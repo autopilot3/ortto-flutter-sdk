@@ -1,0 +1,17 @@
+rootProject.name = 'ortto_flutter_sdk_android'
+
+println 'settings.gradle is being processed'
+
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+        maven { url 'https://s01.oss.sonatype.org/content/repositories/releases/' }
+    }
+}
+
+println "Root Directory: ${rootDir}"
+
+include ':com.ortto.androidsdk'
+project(':com.ortto.androidsdk').projectDir = new File('/Users/mitchflindell/Ortto/android-sdk/messaging')
