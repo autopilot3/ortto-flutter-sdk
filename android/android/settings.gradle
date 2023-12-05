@@ -13,5 +13,5 @@ dependencyResolutionManagement {
 
 println "Root Directory: ${rootDir}"
 
-include ':com.ortto.androidsdk'
-project(':com.ortto.androidsdk').projectDir = new File('/Users/mitchflindell/Ortto/android-sdk/messaging')
+//include ':com.ortto.androidsdk'
+//project(':com.ortto.androidsdk').projectDir = new File('/Users/mitchflindell/Ortto/android-sdk/messaging')

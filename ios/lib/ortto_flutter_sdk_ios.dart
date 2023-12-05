@@ -77,4 +77,13 @@ class FlutterOrttoPushSdkIOS extends FlutterOrttoPushSdkPlatform {
   Future<void> processNextWidgetFromQueue() {
     return methodChannel.invokeMethod('processNextWidgetFromQueue');
   }
+
+  @override
+  Future<bool> onMessageReceived(Map<String, dynamic> message, {bool handleNotificationTrigger = true}) {
+    methodChannel.invokeMethod('onMessageReceived', {
+      'message': message,
+      'handleNotificationTrigger': handleNotificationTrigger,
+    });
+    return Future.value(true);
+  }
 }

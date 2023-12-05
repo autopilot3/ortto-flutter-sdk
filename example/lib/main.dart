@@ -3,8 +3,10 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+
 import 'package:ortto_flutter_sdk/flutter_ortto_push_sdk.dart';
 import 'package:ortto_flutter_example/firebase_options.dart';
+
 import 'package:uuid/uuid.dart';
 
 void main() async {
@@ -62,6 +64,15 @@ void main() async {
 
   runApp(const MyApp());
 }
+
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp();
+  // Ortto.messagingPush().onBackgroundMessageReceived(message.toMap()).then((handled) {
+  // //   handled is true if notification was handled by Customer.io SDK; false otherwise
+    // return handled;
+  // });
+}
+
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});

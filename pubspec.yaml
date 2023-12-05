@@ -20,11 +20,11 @@ dependencies:
   flutter:
     sdk: flutter
   ortto_flutter_sdk_android:
-    path: ../android
+    path: android
   ortto_flutter_sdk_ios:
-    path: ../ios
+    path: ios
   ortto_flutter_platform_interface:
-    path: ../platform_interface
+    path: platform_interface
 
 dev_dependencies:
   flutter_test:

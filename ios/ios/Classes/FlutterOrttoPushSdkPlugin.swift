@@ -7,12 +7,18 @@ import FirebaseMessaging
 
 public class FlutterOrttoPushSdkPlugin: NSObject, FlutterPlugin, UNUserNotificationCenterDelegate {
     public static func register(with registrar: FlutterPluginRegistrar) {
+        // log this method call
+        print("ortto@sdkPlugin.register")
         let channel = FlutterMethodChannel(name: "flutter_ortto_push_sdk_ios", binaryMessenger: registrar.messenger())
         let instance = FlutterOrttoPushSdkPlugin()
         registrar.addMethodCallDelegate(instance, channel: channel)
     }
 
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+
+        // log api call here
+        print("ortto@sdkPlugin.register \(call.method)")
+
         switch call.method {
         case "initialize":
             initialize(call)

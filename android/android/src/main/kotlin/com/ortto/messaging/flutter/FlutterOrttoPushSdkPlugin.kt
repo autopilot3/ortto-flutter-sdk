@@ -4,12 +4,17 @@ import android.app.Activity
 import android.app.Application
 import android.content.Context
 import android.util.Log
+import com.google.firebase.messaging.RemoteMessage
 import com.ortto.messaging.Ortto
 import com.ortto.messaging.OrttoConfig
 import com.ortto.messaging.PermissionUtil
 import com.ortto.messaging.data.LinkUtm
 import com.ortto.messaging.identity.UserID
 import com.ortto.messaging.widget.CaptureConfig
+import com.ortto.messaging.PushNotificationHandler
+
+//import com.google.firebase.messaging.RemoteMessage
+
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
@@ -44,6 +49,7 @@ class FlutterOrttoPushSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
             "initializeCapture" -> result.success(initializeCapture(call))
             "identify" -> result.success(identify(call))
             "requestPermissions" -> requestPermissions(result)
+            "onMessageReceived" -> onMessageReceived(call)
             "queueWidget" -> {
                 queueWidget(call)
                 result.success(null)
@@ -201,5 +207,46 @@ class FlutterOrttoPushSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
 
     override fun onDetachedFromActivity() {
         activity = null
+    }
+
+    private fun onMessageReceived(call: MethodCall): Boolean {
+        val message = call.argument<Map<String, Any>?>("message")
+        val context = applicationContext as Context
+
+        // Log message here
+        Log.d("ortto@plugin", "onMessageReceived: $message")
+
+        // Inline transformation logic
+        val notification = message?.get("notification") as? Map<String, Any>
+        val data = message?.get("data") as? Map<String, Any>
+        val messageParams = mutableMapOf<String, String>()
+
+        notification?.forEach { (key, value) ->
+            messageParams[key] = value.toString()
+        }
+        // Ensuring 'data' params take precedence as they are mainly used in rich push
+        data?.forEach { (key, value) ->
+            messageParams[key] = value.toString()
+        }
+
+        // Construct RemoteMessage
+        val remoteMessageBuilder = RemoteMessage.Builder("test").apply {
+            messageParams.forEach { (key, value) ->
+                addData(key, value)
+            }
+            (message?.get("messageId") as? String)?.let { messageId = it }
+            (message?.get("messageType") as? String)?.let { messageType = it }
+            (message?.get("collapseKey") as? String)?.let { collapseKey = it }
+            (message?.get("ttl") as? Int)?.let { ttl = it }
+        }
+        val remoteMessage = remoteMessageBuilder.build()
+
+        // Log remoteMessage
+        Log.d("ortto@plugin", "remoteMessage: $remoteMessage")
+
+        val handler = PushNotificationHandler(remoteMessage)
+        Log.d("ortto@plugin", "handler: $handler")
+
+        return handler.handleMessage(context)
     }
 }

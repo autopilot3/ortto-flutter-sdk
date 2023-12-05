@@ -63,4 +63,12 @@ abstract class FlutterOrttoPushSdkPlatform extends PlatformInterface {
   Future<void> showWidget(String widgetId);
 
   Future<void> processNextWidgetFromQueue();
+
+  Future<bool> onMessageReceived(Map<String, dynamic> message, {bool handleNotificationTrigger = true}) {
+    throw UnimplementedError('onMessageReceived() has not been implemented.');
+  }
+
+  Future<bool> onBackgroundMessageReceived(Map<String, dynamic> message) {
+    return onMessageReceived(message,  handleNotificationTrigger: message['notification'] == null);
+  }
 }

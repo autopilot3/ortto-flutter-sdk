@@ -14,7 +14,7 @@ buildscript {
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 
-group ''
+group 'com.ortto.androidsdk'
 version '1.0-SNAPSHOT'
 
 rootProject.allprojects {
@@ -47,7 +47,8 @@ android {
 
 dependencies {
     // implementation project(":orttosdk")
-    implementation project (':com.ortto.androidsdk')
+    // implementation project (':com.ortto.androidsdk')
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-    // implementation "com.ortto:androidsdk:1.5.0"
+    implementation "com.ortto:androidsdk:1.5.0"
+    implementation 'com.google.firebase:firebase-messaging-ktx:23.3.1'
 }

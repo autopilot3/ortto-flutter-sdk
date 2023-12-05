@@ -75,4 +75,8 @@ class Ortto {
   Future<LinkUtm> trackLinkClick(String link) {
     return _platform.trackLinkClick(link);
   }
+
+  Future<bool> onbackgroundMessageReceived(Map<String, dynamic> message, {bool handleNotificationTrigger = true}) {
+    return _platform.onMessageReceived(message, handleNotificationTrigger: handleNotificationTrigger);
+  }
 }
