@@ -15,5 +15,5 @@ dependencies:
   flutter:
     sdk: flutter
   ortto_flutter_sdk:
-    path: ../flutter_ortto_push_sdk
+    path: ../flutter_ortto_sdk
 ```

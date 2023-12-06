@@ -1,0 +1,29 @@
+name: ortto_flutter_sdk_example
+description: Demonstrates how to use the ortto_flutter_sdk plugin.
+version: 0.1.0+1
+publish_to: none
+
+environment:
+  sdk: ">=3.0.0 <4.0.0"
+
+dependencies:
+  firebase_analytics: ^10.4.5
+  firebase_core: ^2.15.0
+  firebase_messaging: ^14.6.5
+  flutter:
+    sdk: flutter
+  ortto_flutter_sdk:
+    path: ../
+  uuid: ^3.0.6
+
+dev_dependencies:
+  flutter_driver:
+    sdk: flutter
+  flutter_test:
+    sdk: flutter
+  integration_test:
+    sdk: flutter
+  very_good_analysis: ^5.0.0
+
+flutter:
+  uses-material-design: true

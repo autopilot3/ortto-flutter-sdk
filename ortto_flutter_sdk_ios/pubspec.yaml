@@ -1,0 +1,25 @@
+name: ortto_flutter_sdk_ios
+description: Ortto Flutter SDK iOS
+version: 0.1.0+1
+homepage: https://ortto.com/
+repository: https://github.com/autopilot3/ortto-flutter-sdk
+
+environment:
+  sdk: ">=3.0.0 <4.0.0"
+  flutter: ">=3.10.0"
+
+flutter:
+  plugin:
+    platforms:
+      ios:
+        pluginClass: OrttoFlutterSdkPlugin
+        dartPluginClass: OrttoFlutterSdkIOS
+
+dependencies:
+  flutter:
+    sdk: flutter
+  ortto_flutter_sdk_platform_interface: ^0.1.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
