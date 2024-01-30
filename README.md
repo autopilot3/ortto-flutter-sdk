@@ -131,6 +131,13 @@ class NotificationService: UNNotificationServiceExtension {
 }
 ```
 
+## Deep linking
+
+Please refer to the following documentation for deep linking in Flutter https://docs.flutter.dev/ui/navigation/deep-linking 
+
+Ensure your deep linking URL scheme is set up correctly in your Ortto dashboard.
+
+
 ## API
 
 initialize
