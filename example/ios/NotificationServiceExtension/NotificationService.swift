@@ -6,7 +6,6 @@
 //
 
 import UserNotifications
-import OrttoSDKCore
 import OrttoPushMessagingFCM
 
 class NotificationService: UNNotificationServiceExtension {

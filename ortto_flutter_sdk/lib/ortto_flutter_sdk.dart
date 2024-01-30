@@ -1,5 +1,12 @@
 import 'package:ortto_flutter_sdk_platform_interface/ortto_flutter_sdk_platform_interface.dart';
 
+export 'package:ortto_flutter_sdk_platform_interface/src/models/capture_config.dart';
+export 'package:ortto_flutter_sdk_platform_interface/src/models/link_utm.dart';
+export 'package:ortto_flutter_sdk_platform_interface/src/models/ortto_config.dart';
+export 'package:ortto_flutter_sdk_platform_interface/src/models/push_permission.dart';
+export 'package:ortto_flutter_sdk_platform_interface/src/models/user_id.dart';
+
+
 class Ortto {
   Ortto._privateConstructor();
 
@@ -47,6 +54,10 @@ class Ortto {
 
   Future<PushPermission> requestPermissions() {
     return _platform.requestPermissions();
+  }
+
+  Future<void> registerDeviceToken(String token) {
+    return _platform.registerDeviceToken(token);
   }
 
   Future<void> showWidget(String widgetId) {

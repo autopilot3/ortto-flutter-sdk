@@ -6,7 +6,7 @@ import 'package:ortto_flutter_sdk_platform_interface/ortto_flutter_sdk_platform_
 class OrttoFlutterSdkIOS extends OrttoFlutterSdkPlatformInterface {
   /// The method channel used to interact with the native platform.
   @visibleForTesting
-  final methodChannel = const MethodChannel('flutter_ortto_push_sdk_ios');
+  final methodChannel = const MethodChannel('ortto_flutter_sdk_ios');
 
   /// Registers this class as the default instance of [OrttoFlutterSdkPlatformInterface]
   static void registerWith() {
@@ -50,6 +50,13 @@ class OrttoFlutterSdkIOS extends OrttoFlutterSdkPlatformInterface {
           PushPermission.values
             .firstWhere((e) => e.toString() == 'PushPermission.$value'),
         );
+  }
+
+  @override
+  Future<void> registerDeviceToken(String token) {
+    return methodChannel.invokeMethod('registerDeviceToken', {
+      'token': token,
+    });
   }
 
   @override

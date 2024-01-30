@@ -28,8 +28,8 @@ enum class PushPermission {
     PREVIOUSLY_GRANTED,
 }
 
-class FlutterOrttoPushSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
-    private var tag = "FlutterOrttoPushSdkPlugin";
+class OrttoFlutterSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
+    private var tag = "OrttoFlutterSdkPlugin";
     private lateinit var channel: MethodChannel
     private var applicationContext: Context? = null
     private var activity: Activity? = null;
@@ -214,20 +214,29 @@ class FlutterOrttoPushSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAwar
         // Inline transformation logic
         val notification = message?.get("notification") as? Map<String, Any>
         val data = message?.get("data") as? Map<String, Any>
-        val messageParams = mutableMapOf<String, String>()
+        val messageParams = mutableMapOf<String, Any>()
+
+        // print out message, notification, data, messageparams
+        Log.d(tag, "message: $message")
+        Log.d(tag, "notification: $notification")
+        Log.d(tag, "data: $data")
+        Log.d(tag, "messageParams: $messageParams")
 
         notification?.forEach { (key, value) ->
-            messageParams[key] = value.toString()
+            messageParams[key] = value
         }
         // Ensuring 'data' params take precedence as they are mainly used in rich push
         data?.forEach { (key, value) ->
-            messageParams[key] = value.toString()
+            messageParams[key] = value
         }
 
         // Construct RemoteMessage
         val remoteMessageBuilder = RemoteMessage.Builder("test").apply {
             messageParams.forEach { (key, value) ->
-                addData(key, value)
+                // if value is null, dont add it
+                if (value != null) {
+                    addData(key, value.toString())
+                }
             }
             (message?.get("messageId") as? String)?.let { messageId = it }
             (message?.get("messageType") as? String)?.let { messageType = it }

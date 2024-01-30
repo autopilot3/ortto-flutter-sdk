@@ -54,6 +54,8 @@ abstract class OrttoFlutterSdkPlatformInterface extends PlatformInterface {
 
   Future<PushPermission> requestPermissions();
 
+  Future<void> registerDeviceToken(String token);
+
   Future<void> dispatchPushRequest();
 
   Future<LinkUtm> trackLinkClick(String link);

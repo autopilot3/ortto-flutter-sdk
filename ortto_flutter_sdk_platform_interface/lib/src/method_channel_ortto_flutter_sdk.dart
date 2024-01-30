@@ -39,6 +39,11 @@ class MethodChannelOrttoFlutterSdk extends OrttoFlutterSdkPlatformInterface {
   }
 
   @override
+  Future<void> registerDeviceToken(String token) {
+    throw UnimplementedError();
+  }
+
+  @override
   Future<PushPermission> requestPermissions() {
     throw UnimplementedError();
   }

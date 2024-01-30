@@ -53,6 +53,13 @@ class FlutterOrttoPushSdkAndroid extends OrttoFlutterSdkPlatformInterface {
   }
 
   @override
+  Future<void> registerDeviceToken(String token) {
+    return methodChannel.invokeMethod('registerDeviceToken', {
+      'token': token,
+    });
+  }
+
+  @override
   Future<LinkUtm> trackLinkClick(String link) {
     return methodChannel.invokeMethod('trackLinkClick', {
       'link': link,
@@ -80,11 +87,9 @@ class FlutterOrttoPushSdkAndroid extends OrttoFlutterSdkPlatformInterface {
 
   @override
   Future<bool> onMessageReceived(Map<String, dynamic> message, {bool handleNotificationTrigger = true}) async {
-    final bool result = await methodChannel.invokeMethod('onMessageReceived', {
+    return await methodChannel.invokeMethod('onMessageReceived', {
       'message': message,
       'handleNotificationTrigger': handleNotificationTrigger,
     });
-
-    return result;
   }
 }

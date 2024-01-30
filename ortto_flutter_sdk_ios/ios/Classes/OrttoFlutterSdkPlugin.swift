@@ -32,6 +32,8 @@ public class OrttoFlutterSdkPlugin: NSObject, FlutterPlugin, UNUserNotificationC
         case "requestPermissions":
             // TODO: implement requestPermissions
             result(nil)
+        case "registerDeviceToken":
+            registerDeviceToken(call)
         case "trackLinkClick":
             trackLinkClick(call, result)
         case "queueWidget":
@@ -43,6 +45,9 @@ public class OrttoFlutterSdkPlugin: NSObject, FlutterPlugin, UNUserNotificationC
         case "processNextWidgetFromQueue":
             processNextWidgetFromQueue()
             result(nil)
+        case "onMessageReceived":
+            onMessageReceived(call, result)
+
         default:
             result(FlutterMethodNotImplemented)
         }
@@ -96,6 +101,16 @@ public class OrttoFlutterSdkPlugin: NSObject, FlutterPlugin, UNUserNotificationC
         }
     }
 
+    private func registerDeviceToken(_ call: FlutterMethodCall) {
+        guard let args = call.arguments as? [String:Any?] else {
+            return
+        }
+
+        if let token = args["token"] as? String {
+            PushMessaging.shared.registerDeviceToken(fcmToken: token)
+        }
+    }
+
     private func trackLinkClick(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
         guard let args = call.arguments as? [String:Any?] else {
             return
@@ -127,6 +142,11 @@ public class OrttoFlutterSdkPlugin: NSObject, FlutterPlugin, UNUserNotificationC
         }
 
         result(linkUtm)
+    }
+
+    private func onMessageReceived(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
+        //
+        result(true)
     }
 
     private func processNextWidgetFromQueue() {
