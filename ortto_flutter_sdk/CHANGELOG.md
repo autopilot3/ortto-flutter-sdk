@@ -1,3 +1,7 @@
+## 0.2.2
+
+- Update Dependencies
+
 ## 0.2.0
 
 - Prep for publishing

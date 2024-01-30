@@ -1,5 +1,11 @@
-# Ortto Flutter SDK
+# Ortto Flutter Plugin
 
+[![pub package](https://img.shields.io/pub/v/ortto_flutter_sdk.svg)](https://pub.dev/packages/ortto_flutter_sdk)
+
+## Other Packages 
+- ortto_flutter_sdk_platform_interface https://pub.dev/packages/ortto_flutter_sdk_platform_interface
+- ortto_flutter_sdk_android https://pub.dev/packages/ortto_flutter_sdk_android
+- ortto_flutter_sdk_ios https://pub.dev/packages/ortto_flutter_sdk_ios
 
 ## Pre-Requisites
 
@@ -8,7 +14,6 @@
 3. Attach Firebase project `flutterfire configure --project=<FIREBASE_PROJECT_ID>`
 4. Add Firebase messaging dependency `flutter pub add firebase_messaging`
 5. Ensure `lib/firebase_options.dart` config file is present and configured correctly
-
 
 ## Usage
 
@@ -152,6 +157,10 @@ showWidget
 processNextWidgetFromQueue
 onMessageReceived
 
+## Reporting Issues
+
+Please report all issues to Github https://github.com/autopilot3/ortto-flutter-sdk/issues 
+
 # Publishing
 
 Publishing must be done in this order.
@@ -183,3 +192,16 @@ cd ortto_flutter_sdk_android
 flutter pub publish
 # confirm version and publish
 ```
+
+## 4. ortto_flutter_sdk
+```bash
+# Update version in pubspec.yaml
+# Update CHANGELOG.md
+cd ortto_flutter_sdk
+flutter pub publish
+# confirm version and publish
+```
+
+## License
+   
+MIT License (MIT)
