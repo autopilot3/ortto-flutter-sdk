@@ -131,27 +131,6 @@ class NotificationService: UNNotificationServiceExtension {
 }
 ```
 
-
-Navigate to the `ios` folder: `cd ios`
-2. Install the Ortto iOS SDK `pod install `
-
-
-```
-flutter pub add ortto
-```
-
-# install android google-services.json file 
-# install ios .plist file
-
-
-```yaml
-dependencies:
-  flutter:
-    sdk: flutter
-  ortto_flutter_sdk:
-    path: ../flutter_ortto_sdk
-```
-
 ## API
 
 initialize
