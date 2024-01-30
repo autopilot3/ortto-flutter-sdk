@@ -143,6 +143,11 @@ Please refer to the following documentation for deep linking in Flutter https://
 Ensure your deep linking URL scheme is set up correctly in your Ortto dashboard.
 
 
+```dart
+await Ortto.instance.trackLinkClick("deep://link-from/push-notification?with=parameters&included=true");
+```
+
+
 ## API
 
 initialize

@@ -33,6 +33,8 @@ void main() async {
   await Ortto.instance.identify(user);
   await Ortto.instance.dispatchPushRequest();
 
+  Ortto.instance.trackLinkClick("some-link");
+
   runApp(const MyApp());
 }
 
