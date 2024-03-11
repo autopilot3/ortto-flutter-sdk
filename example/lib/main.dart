@@ -33,7 +33,27 @@ void main() async {
   await Ortto.instance.identify(user);
   await Ortto.instance.dispatchPushRequest();
 
-  Ortto.instance.trackLinkClick("some-link");
+  FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
+      badge: true,
+      alert: true,
+      sound: true
+  );
+
+  final fcmToken = await FirebaseMessaging.instance.getToken();
+  if (fcmToken != null) {
+    Ortto.instance.registerDeviceToken(fcmToken);
+  }
+
+  FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+    Ortto.instance
+      .onbackgroundMessageReceived(message.toMap())
+      .then((handled) {
+        print("handled $handled");
+        return handled;
+      });
+  });
+
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
   runApp(const MyApp());
 }
