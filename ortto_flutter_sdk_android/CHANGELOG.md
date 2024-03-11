@@ -1,3 +1,6 @@
+## 0.2.3
+- Update to the latest version of `com.ortto:androidsdk`
+
 ## 0.2.2 
 - Downgrade required compile sdk version
 
