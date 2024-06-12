@@ -92,4 +92,13 @@ class FlutterOrttoPushSdkAndroid extends OrttoFlutterSdkPlatformInterface {
       'handleNotificationTrigger': handleNotificationTrigger,
     });
   }
+
+  Future<IdentityResult> clearIdentity() async {
+    final Map<String, dynamic>? response = await methodChannel.invokeMethod('clearIdentity');
+    if (response != null) {
+      return IdentityResult.fromMap(response);
+    } else {
+      throw Exception("Failed to clear identity");
+    }
+  }
 }
