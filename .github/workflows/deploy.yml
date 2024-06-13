@@ -23,9 +23,6 @@ jobs:
       - name: Setup Dart
         uses: dart-lang/setup-dart@v1
 
-      - name: Install dependencies
-        run: dart pub get
-
       - name: Deploy platform_interface
         run: dart pub publish --dry-run --directory=ortto_flutter_sdk_platform_interface
 
