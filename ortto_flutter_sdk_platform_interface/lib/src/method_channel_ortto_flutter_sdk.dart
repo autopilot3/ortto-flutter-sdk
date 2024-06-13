@@ -2,8 +2,6 @@ import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:flutter/services.dart';
 import 'package:ortto_flutter_sdk_platform_interface/ortto_flutter_sdk_platform_interface.dart';
 
-import '../ortto_flutter_sdk_platform_interface.dart';
-
 /// An implementation of [OrttoFlutterSdkPlatformInterface] that uses method channels.
 class MethodChannelOrttoFlutterSdk extends OrttoFlutterSdkPlatformInterface {
   /// The method channel used to interact with the native platform.
