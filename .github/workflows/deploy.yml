@@ -35,19 +35,19 @@ jobs:
         run: |
           cd ortto_flutter_sdk_platform_interface
           flutter pub get
-          flutter pub publish --dry-run 
+          flutter pub publish || true
 
       - name: Deploy sdk_ios
         run: | 
           cd ortto_flutter_sdk_ios 
-          dart pub publish --dry-run
+          dart pub publish || true
 
       - name: Deploy sdk_android
         run: |
           cd ortto_flutter_sdk_android 
-          dart pub publish --dry-run 
+          dart pub publish || true
 
       - name: Deploy sdk
         run: |
           cd ortto_flutter_sdk 
-          dart pub publish --dry-run
+          dart pub publish || true
