@@ -25,7 +25,7 @@ jobs:
 
       - name: Deploy platform_interface
         run: |
-          cd ortto_flutter_platform_interface
+          cd ortto_flutter_sdk_platform_interface
           flutter pub publish --dry-run 
 
       - name: Deploy sdk_ios
