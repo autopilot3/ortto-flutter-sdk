@@ -1,3 +1,6 @@
+## 0.3.0
+* Adds `clearIdentity` method to unsubscribe from push notifications
+
 ## 0.2.3
 - Update Android to the latest version of `com.ortto:androidsdk`
 
