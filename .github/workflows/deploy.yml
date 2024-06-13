@@ -1,0 +1,39 @@
+name: Deploy SDK
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: 'Reference (tag, commit)'
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  deploy-to-pub-dev:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
+
+      - name: Setup Dart
+        uses: dart-lang/setup-dart@v1
+
+      - name: Install dependencies
+        run: dart pub get
+
+      - name: Deploy platform_interface
+        run: dart pub publish --dry-run --directory=ortto_flutter_sdk_platform_interface
+
+      - name: Deploy sdk_ios
+        run: dart pub publish --dry-run --directory=ortto_flutter_sdk_ios
+
+      - name: Deploy sdk_android
+        run: dart pub publish --dry-run --directory=ortto_flutter_sdk_android
+
+      - name: Deploy sdk
+        run: dart pub publish --dry-run --directory=ortto_flutter_sdk
