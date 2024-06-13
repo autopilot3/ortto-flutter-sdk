@@ -20,14 +20,18 @@ jobs:
         with:
           ref: ${{ inputs.ref }}
 
-      - name: Setup Dart
-        uses: dart-lang/setup-dart@v1
+      - name: Setup Flutter SDK
+        uses: flutter-actions/setup-flutter@v3
+        with:
+          channel: stable
+          version: 3.0.2
+
 
       - name: Deploy platform_interface
         run: |
           cd ortto_flutter_sdk_platform_interface
-          dart pub get
-          dart pub publish --dry-run 
+          flutter pub get
+          flutter pub publish --dry-run 
 
       - name: Deploy sdk_ios
         run: | 
