@@ -20,12 +20,16 @@ jobs:
         with:
           ref: ${{ inputs.ref }}
 
+      - name: Setup Dart
+        uses: dart-lang/setup-dart@v1
+        with:
+          sdk: 3.4.4
+
       - name: Setup Flutter SDK
         uses: flutter-actions/setup-flutter@v3
         with:
+          version: latest
           channel: stable
-          version: 3.0.2
-
 
       - name: Deploy platform_interface
         run: |
