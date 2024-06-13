@@ -68,6 +68,7 @@ class OrttoFlutterSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 clearData()
                 result.success(null)
             }
+            "clearIdentity" -> clearIdentity(result)
             "trackLinkClick" -> trackLinkClick(call, result)
             else -> result.notImplemented()
         }
@@ -216,12 +217,6 @@ class OrttoFlutterSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         val data = message?.get("data") as? Map<String, Any>
         val messageParams = mutableMapOf<String, Any>()
 
-        // print out message, notification, data, messageparams
-        Log.d(tag, "message: $message")
-        Log.d(tag, "notification: $notification")
-        Log.d(tag, "data: $data")
-        Log.d(tag, "messageParams: $messageParams")
-
         notification?.forEach { (key, value) ->
             messageParams[key] = value
         }
@@ -248,5 +243,12 @@ class OrttoFlutterSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         val handler = PushNotificationHandler(remoteMessage)
 
         return handler.handleMessage(context)
+    }
+
+    private fun clearIdentity(result: MethodChannel.Result) {
+        Ortto.instance().clearIdentity() {
+            val responseMap = mapOf("sessionId" to it.sessionId)
+            result.success(responseMap)
+        }
     }
 }

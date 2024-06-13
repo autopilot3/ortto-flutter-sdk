@@ -3,6 +3,7 @@ import UIKit
 import OrttoSDKCore
 import OrttoPushMessagingFCM
 import OrttoInAppNotifications
+import OrttoPushMessaging
 import FirebaseMessaging
 
 public class OrttoFlutterSdkPlugin: NSObject, FlutterPlugin, UNUserNotificationCenterDelegate {
@@ -47,7 +48,8 @@ public class OrttoFlutterSdkPlugin: NSObject, FlutterPlugin, UNUserNotificationC
             result(nil)
         case "onMessageReceived":
             onMessageReceived(call, result)
-
+        case "clearIdentity":
+            clearIdentity(call, result)
         default:
             result(FlutterMethodNotImplemented)
         }
@@ -145,7 +147,6 @@ public class OrttoFlutterSdkPlugin: NSObject, FlutterPlugin, UNUserNotificationC
     }
 
     private func onMessageReceived(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
-        //
         result(true)
     }
 
@@ -165,8 +166,21 @@ public class OrttoFlutterSdkPlugin: NSObject, FlutterPlugin, UNUserNotificationC
         let handled = PushMessaging.shared.userNotificationCenter(center, didReceive: response, withCompletionHandler: completionHandler)
 
         if !handled {
-            // tell the app that we have finished processing the user’s action / response
             completionHandler()
+        }
+    }
+
+    public func clearIdentity(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
+        Ortto.shared.clearIdentity { response in
+            guard let response = response else {
+                result(nil)
+                return
+            }
+
+            let responseDict: [String: Any] = [
+                "session_id": response.sessionId
+            ]
+            result(responseDict)
         }
     }
 }

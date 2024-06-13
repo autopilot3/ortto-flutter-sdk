@@ -5,6 +5,7 @@ export 'package:ortto_flutter_sdk_platform_interface/src/models/link_utm.dart';
 export 'package:ortto_flutter_sdk_platform_interface/src/models/ortto_config.dart';
 export 'package:ortto_flutter_sdk_platform_interface/src/models/push_permission.dart';
 export 'package:ortto_flutter_sdk_platform_interface/src/models/user_id.dart';
+export 'package:ortto_flutter_sdk_platform_interface/src/models/identity_result.dart';
 
 
 class Ortto {
@@ -86,5 +87,9 @@ class Ortto {
 
   Future<bool> onbackgroundMessageReceived(Map<String, dynamic> message, {bool handleNotificationTrigger = true}) {
     return _platform.onMessageReceived(message, handleNotificationTrigger: handleNotificationTrigger);
+  }
+
+  Future<IdentityResult> clearIdentity() {
+    return _platform.clearIdentity();
   }
 }
