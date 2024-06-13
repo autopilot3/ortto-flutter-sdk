@@ -24,13 +24,21 @@ jobs:
         uses: dart-lang/setup-dart@v1
 
       - name: Deploy platform_interface
-        run: dart pub publish --dry-run --directory=ortto_flutter_sdk_platform_interface
+        run: |
+          cd ortto_flutter_platform_interface
+          flutter pub publish --dry-run 
 
       - name: Deploy sdk_ios
-        run: dart pub publish --dry-run --directory=ortto_flutter_sdk_ios
+        run: | 
+          cd ortto_flutter_sdk_ios 
+          flutter pub publish --dry-run
 
       - name: Deploy sdk_android
-        run: dart pub publish --dry-run --directory=ortto_flutter_sdk_android
+        run: |
+          cd ortto_flutter_sdk_android 
+          flutter pub publish --dry-run 
 
       - name: Deploy sdk
-        run: dart pub publish --dry-run --directory=ortto_flutter_sdk
+        run: |
+          cd ortto_flutter_sdk 
+          flutter pub publish --dry-run
