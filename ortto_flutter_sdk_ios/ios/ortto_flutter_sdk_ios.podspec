@@ -17,7 +17,7 @@ Pod::Spec.new do |s|
 
   # Dependencies
   s.dependency 'Flutter'
-  s.dependency 'OrttoSDKCore', '1.5.7'
-  s.dependency 'OrttoInAppNotifications', '1.5.7'
-  s.dependency 'OrttoPushMessagingFCM', '1.5.7'
+  s.dependency 'OrttoSDKCore', '1.5.8'
+  s.dependency 'OrttoInAppNotifications', '1.5.8'
+  s.dependency 'OrttoPushMessagingFCM', '1.5.8'
 end

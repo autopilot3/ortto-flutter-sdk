@@ -1,3 +1,7 @@
+## 0.3.1
+* Fixes an issue with base64URL decoding deep link tracking URLs
+* Updates Android Java SDK to v1.6.5
+
 ## 0.3.0
 * Adds `clearIdentity` method to unsubscribe from push notifications
 

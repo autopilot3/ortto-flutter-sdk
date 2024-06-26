@@ -1,12 +1,9 @@
 name: Deploy SDK
 
 on:
-  workflow_dispatch:
-    inputs:
-      ref:
-        description: 'Reference (tag, commit)'
-        required: true
-        type: string
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+*'
 
 permissions:
   contents: write
@@ -14,6 +11,8 @@ permissions:
 jobs:
   deploy-to-pub-dev:
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write # Required for authentication using OIDC
     steps:
       - name: Checkout code
         uses: actions/checkout@v4

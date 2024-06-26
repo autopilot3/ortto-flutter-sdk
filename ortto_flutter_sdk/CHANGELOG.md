@@ -1,3 +1,8 @@
+## 0.3.1
+- Update Flutter Android SDK to v1.6.4
+- Update Flutter iOS SDK to v1.5.8
+- Resolves an issue with deep link tracking URL's not being decoded correctly
+
 ## 0.3.0
 * Adds `clearIdentity` method to unsubscribe from push notifications
 
