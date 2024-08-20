@@ -18,7 +18,7 @@ group 'com.ortto.androidsdk'
 version '1.0-SNAPSHOT'
 
 android {
-    compileSdkVersion 30
+    compileSdkVersion 34
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
