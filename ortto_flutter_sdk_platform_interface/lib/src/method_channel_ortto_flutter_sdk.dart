@@ -64,7 +64,7 @@ class MethodChannelOrttoFlutterSdk extends OrttoFlutterSdkPlatformInterface {
   }
 
   @override
-  Future<void> showWidget(String widgetId) {
+  Future<WidgetResult> showWidget(String widgetId) {
     throw UnimplementedError();
   }
 

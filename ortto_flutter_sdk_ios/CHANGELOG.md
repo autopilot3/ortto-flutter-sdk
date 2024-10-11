@@ -1,3 +1,10 @@
+## 0.3.3
+* Updates iOS SDK to v1.6.2
+* Returns Future<WidgetResult> instead of void for showWidget(widgetId)
+
+## 0.3.2
+* Update Ortto SDK to v1.5.9 which fixes an issue with registering nil push tokens
+
 ## 0.3.1
 * Fixes an issue with base64URL decoding deep link tracking URLs
 * Updates iOS Swift SDK to v1.5.8 

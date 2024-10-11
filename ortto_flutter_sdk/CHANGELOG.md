@@ -1,3 +1,10 @@
+## 0.3.3
+* Updates iOS SDK to v1.6.2
+* Returns Future<WidgetResult> instead of void for showWidget(widgetId)
+
+## 0.3.2
+- Update Native iOS SDK to v1.5.9
+
 ## 0.3.1
 - Update Flutter Android SDK to v1.6.4
 - Update Flutter iOS SDK to v1.5.8

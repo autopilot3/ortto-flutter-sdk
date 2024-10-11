@@ -74,10 +74,10 @@ class FlutterOrttoPushSdkAndroid extends OrttoFlutterSdkPlatformInterface {
   }
 
   @override
-  Future<void> showWidget(String widgetId) {
+  Future<WidgetResult> showWidget(String widgetId) {
     return methodChannel.invokeMethod('showWidget', {
       'widgetId': widgetId,
-    });
+    }).then((value) => WidgetResult.fromMap(value.cast<String, dynamic>()));
   }
 
   @override
