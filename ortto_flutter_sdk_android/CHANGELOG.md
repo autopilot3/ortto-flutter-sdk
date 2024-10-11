@@ -1,3 +1,6 @@
+## 0.3.3
+* Returns Future<WidgetResult> instead of void for showWidget(widgetId)
+
 ## 0.3.1
 * Fixes an issue with base64URL decoding deep link tracking URLs
 * Updates Android Java SDK to v1.6.5

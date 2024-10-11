@@ -1,3 +1,9 @@
+## 0.3.3
+* Returns Future<WidgetResult> instead of void for showWidget(widgetId)
+
+## 0.3.2
+* Updates iOS SDK
+
 ## 0.3.0
 * Adds `clearIdentity` method to unsubscribe from push notifications
 

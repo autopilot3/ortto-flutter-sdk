@@ -12,6 +12,7 @@ import com.ortto.messaging.data.LinkUtm
 import com.ortto.messaging.identity.UserID
 import com.ortto.messaging.widget.CaptureConfig
 import com.ortto.messaging.PushNotificationHandler
+import com.ortto.messaging.OrttoCaptureInitException
 
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
@@ -52,10 +53,7 @@ class OrttoFlutterSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 queueWidget(call)
                 result.success(null)
             }
-            "showWidget" -> {
-                showWidget(call)
-                result.success(null)
-            }
+            "showWidget" -> showWidget(call, result)
             "processNextWidgetFromQueue" -> {
                 processNextWidgetFromQueue()
                 result.success(null)
@@ -158,8 +156,7 @@ class OrttoFlutterSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     private fun trackLinkClick(call: MethodCall, result: MethodChannel.Result) {
         val link = call.argument<String>("link");
 
-        Ortto.instance().trackLinkClick(link
-        ) {
+        Ortto.instance().trackLinkClick(link) {
             Log.d(tag, "trackLinkClick: $it")
 
             val map = mapOf(
@@ -179,10 +176,29 @@ class OrttoFlutterSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         Ortto.instance().queueWidget(widgetId);
     }
 
-    private fun showWidget(call: MethodCall) {
+    private fun showWidget(call: MethodCall, result: MethodChannel.Result) {
         val widgetId = call.argument<String>("widgetId");
 
-        Ortto.instance().showWidget(widgetId);
+        try {
+            Ortto.instance().showWidget(widgetId)
+
+            val widgetResult = mapOf(
+                "success" to true,
+                "message" to "Widget shown successfully."
+            )
+
+            result.success(widgetResult)
+        } catch (e: OrttoCaptureInitException) {
+            // Handle the exception here
+            e.printStackTrace()
+
+            val widgetResult = mapOf(
+                "success" to false,
+                "message" to e.message
+            )
+
+            result.success(widgetResult)
+        }
     }
 
     private fun processNextWidgetFromQueue() {

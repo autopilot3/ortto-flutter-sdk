@@ -6,6 +6,7 @@ export 'package:ortto_flutter_sdk_platform_interface/src/models/ortto_config.dar
 export 'package:ortto_flutter_sdk_platform_interface/src/models/push_permission.dart';
 export 'package:ortto_flutter_sdk_platform_interface/src/models/user_id.dart';
 export 'package:ortto_flutter_sdk_platform_interface/src/models/identity_result.dart';
+export 'package:ortto_flutter_sdk_platform_interface/src/models/widget_result.dart';
 
 
 class Ortto {
@@ -61,7 +62,7 @@ class Ortto {
     return _platform.registerDeviceToken(token);
   }
 
-  Future<void> showWidget(String widgetId) {
+  Future<WidgetResult> showWidget(String widgetId) {
     return _platform.showWidget(widgetId);
   }
 

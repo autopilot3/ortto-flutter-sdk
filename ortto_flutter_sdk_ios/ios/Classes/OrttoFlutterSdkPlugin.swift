@@ -41,8 +41,7 @@ public class OrttoFlutterSdkPlugin: NSObject, FlutterPlugin, UNUserNotificationC
             queueWidget(call)
             result(nil)
         case "showWidget":
-            showWidget(call)
-            result(nil)
+            showWidget(call, result)
         case "processNextWidgetFromQueue":
             processNextWidgetFromQueue()
             result(nil)
@@ -93,13 +92,40 @@ public class OrttoFlutterSdkPlugin: NSObject, FlutterPlugin, UNUserNotificationC
         }
     }
 
-    private func showWidget(_ call: FlutterMethodCall) {
+    private func showWidget(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
         guard let args = call.arguments as? [String:Any?] else {
+            result(["message": "invalid_arguments", "success": false])
             return
         }
 
-        if let widgetId = args["widgetId"] as? String {
-            OrttoCapture.shared.showWidget(widgetId)
+        guard let widgetId = args["widgetId"] as? String else {
+            result(["message": "missing_widget_id", "success": false])
+            return
+        }
+
+        guard OrttoCapture.shared != nil else {
+            result(["message": "ortto_capture_not_initialized", "success": false])
+            return
+        }
+
+        OrttoCapture.shared.showWidget(widgetId).then { showResult in
+            switch showResult {
+            case .success:
+                result(["success": true])
+            case .failure(let error):
+                print("error: \(error)")
+                if let widgetError = error as? WidgetError {
+                    result([
+                        "message": widgetError.errorDescription,
+                        "success": false
+                    ])
+                } else {
+                    result([
+                        "message": error.localizedDescription,
+                        "success": false
+                    ])
+                }
+            }
         }
     }
 

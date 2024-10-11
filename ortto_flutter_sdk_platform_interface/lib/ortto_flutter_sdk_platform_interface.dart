@@ -4,6 +4,7 @@ import 'package:ortto_flutter_sdk_platform_interface/src/models/link_utm.dart';
 import 'package:ortto_flutter_sdk_platform_interface/src/models/ortto_config.dart';
 import 'package:ortto_flutter_sdk_platform_interface/src/models/push_permission.dart';
 import 'package:ortto_flutter_sdk_platform_interface/src/models/user_id.dart';
+import 'package:ortto_flutter_sdk_platform_interface/src/models/widget_result.dart';
 import 'src/models/identity_result.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
@@ -13,6 +14,7 @@ export 'src/models/ortto_config.dart';
 export 'src/models/push_permission.dart';
 export 'src/models/user_id.dart';
 export 'src/models/identity_result.dart';
+export 'src/models/widget_result.dart';
 
 
 /// The interface that implementations of flutter_ortto_push_sdk must implement.
@@ -65,7 +67,7 @@ abstract class OrttoFlutterSdkPlatformInterface extends PlatformInterface {
 
   Future<void> queueWidget(String widgetId);
 
-  Future<void> showWidget(String widgetId);
+  Future<WidgetResult> showWidget(String widgetId);
 
   Future<void> processNextWidgetFromQueue();
 
