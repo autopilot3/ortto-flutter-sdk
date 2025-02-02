@@ -1,3 +1,6 @@
+## 0.3.4
+* Adds support for gradle 8.*
+
 ## 0.3.3
 * Returns Future<WidgetResult> instead of void for showWidget(widgetId)
 
