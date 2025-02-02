@@ -19,6 +19,7 @@ version '1.0-SNAPSHOT'
 
 android {
     compileSdkVersion 34
+    namespace 'com.ortto.messaging.flutter'
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
