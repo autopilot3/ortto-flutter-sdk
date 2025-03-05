@@ -1,3 +1,7 @@
+## 0.4.0
+* Updates Android SDK to v1.8.0
+* Updates ortto_flutter_sdk_android reference to v0.4.0
+
 ## 0.3.3
 * Updates iOS SDK to v1.6.2
 * Returns Future<WidgetResult> instead of void for showWidget(widgetId)
