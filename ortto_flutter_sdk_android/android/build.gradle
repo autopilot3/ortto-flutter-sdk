@@ -17,6 +17,16 @@ apply plugin: 'kotlin-android'
 group 'com.ortto.androidsdk'
 version '1.0-SNAPSHOT'
 
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:8.3.0'
+    }
+}
+
 android {
     compileSdkVersion 34
     namespace 'com.ortto.messaging.flutter'
@@ -41,6 +51,6 @@ android {
 
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-    implementation "com.ortto:androidsdk:1.6.5"
+    implementation "com.ortto:androidsdk:1.8.1"
     implementation 'com.google.firebase:firebase-messaging-ktx:23.3.1'
 }

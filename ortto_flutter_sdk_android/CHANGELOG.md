@@ -1,3 +1,6 @@
+## 0.4.0 
+* Updates android SDK to version v1.8.0
+
 ## 0.3.4
 * Adds support for gradle 8.*
 
