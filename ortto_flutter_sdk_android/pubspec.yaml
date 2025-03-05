@@ -19,9 +19,9 @@ flutter:
 dependencies:
   flutter:
     sdk: flutter
-#  ortto_flutter_sdk_platform_interface: ^0.3.3
-  ortto_flutter_sdk_platform_interface:
-    path: ../ortto_flutter_sdk_platform_interface
+  ortto_flutter_sdk_platform_interface: ^0.3.3
+#  ortto_flutter_sdk_platform_interface:
+#    path: ../ortto_flutter_sdk_platform_interface
 
 dev_dependencies:
   flutter_test:
