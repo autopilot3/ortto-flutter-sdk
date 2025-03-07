@@ -1,3 +1,7 @@
+## 0.4.1
+* Updates android SDK to version v1.8.2
+* Adds User-Agent to http client in Android
+
 ## 0.4.0 
 * Updates android SDK to version v1.8.0
 
