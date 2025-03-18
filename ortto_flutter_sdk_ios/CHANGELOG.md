@@ -1,3 +1,6 @@
+## 0.3.4
+* Explicitly cast the platform channel's raw Map to a String-keyed dynamic-valued Map and handle a potentially null session ID with a default empty string. 
+
 ## 0.3.3
 * Updates iOS SDK to v1.6.2
 * Returns Future<WidgetResult> instead of void for showWidget(widgetId)
