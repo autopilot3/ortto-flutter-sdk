@@ -96,9 +96,10 @@ class OrttoFlutterSdkIOS extends OrttoFlutterSdkPlatformInterface {
   }
 
   Future<IdentityResult> clearIdentity() async {
-    final Map<String, dynamic>? response = await methodChannel.invokeMethod('clearIdentity');
+    final response = await methodChannel.invokeMethod('clearIdentity');
     if (response != null) {
-      return IdentityResult.fromMap(response);
+      final Map<String, dynamic> responseMap = (response as Map).cast<String, dynamic>();
+      return IdentityResult.fromMap(responseMap);
     } else {
       throw Exception("Failed to clear identity");
     }

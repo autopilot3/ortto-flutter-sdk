@@ -5,7 +5,7 @@ class IdentityResult {
 
   factory IdentityResult.fromMap(Map<String, dynamic> map) {
     return IdentityResult(
-      sessionId: map['session_id'],
+      sessionId: map['session_id'] as String? ?? '',
     );
   }
 }
