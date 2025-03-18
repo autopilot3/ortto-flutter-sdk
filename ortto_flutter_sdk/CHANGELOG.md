@@ -1,3 +1,6 @@
+## 0.4.2
+* Update ortto_flutter_sdk_ios to 0.3.4
+
 ## 0.4.1
 * Update ortto_flutter_android to 0.4.1
 * Updates Android SDK to v1.8.2
