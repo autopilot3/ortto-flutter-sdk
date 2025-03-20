@@ -1,3 +1,8 @@
+## 0.4.3
+* Updates android SDK to version v1.8.3
+* Fixes clearIdentity()
+* Adds support for registerDeviceToken() on Android
+
 ## 0.4.1
 * Updates android SDK to version v1.8.2
 * Adds User-Agent to http client in Android

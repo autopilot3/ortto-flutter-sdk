@@ -12,3 +12,6 @@ dependencyResolutionManagement {
 }
 
 println "Root Directory: ${rootDir}"
+
+//include ':ortto-android-sdk'
+//project(':ortto-android-sdk').projectDir = new File(rootDir, '../../android-sdk/messaging')

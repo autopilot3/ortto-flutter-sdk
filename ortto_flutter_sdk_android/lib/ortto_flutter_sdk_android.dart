@@ -94,11 +94,12 @@ class FlutterOrttoPushSdkAndroid extends OrttoFlutterSdkPlatformInterface {
   }
 
   Future<IdentityResult> clearIdentity() async {
-    final Map<String, dynamic>? response = await methodChannel.invokeMethod('clearIdentity');
-    if (response != null) {
-      return IdentityResult.fromMap(response);
+    final response = await methodChannel.invokeMethod('clearIdentity');
+    if (response is Map) {
+      final Map<String, dynamic> responseMap = response.cast<String, dynamic>();
+      return IdentityResult.fromMap(responseMap);
     } else {
-      throw Exception("Failed to clear identity");
+      throw Exception("Invalid response type: ${response.runtimeType}");
     }
   }
 }

@@ -54,6 +54,7 @@ class OrttoFlutterSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 result.success(null)
             }
             "showWidget" -> showWidget(call, result)
+            "registerDeviceToken" -> registerDeviceToken(call, result)
             "processNextWidgetFromQueue" -> {
                 processNextWidgetFromQueue()
                 result.success(null)
@@ -167,6 +168,12 @@ class OrttoFlutterSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             )
 
             result.success(map);
+        }
+    }
+
+    private fun registerDeviceToken(call: MethodCall, result: MethodChannel.Result) {
+        Ortto.instance().registerDeviceToken(call.argument<String>("token")) {
+            result.success(null);
         }
     }
 
