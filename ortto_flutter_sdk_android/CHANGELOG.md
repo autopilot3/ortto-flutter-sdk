@@ -1,3 +1,8 @@
+## 0.4.4
+* Updates android SDK to version v1.8.4
+* allow appContext to be null in permission call
+* allow async callback for identify calls
+
 ## 0.4.3
 * Updates android SDK to version v1.8.3
 * Fixes clearIdentity()

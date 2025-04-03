@@ -22,8 +22,7 @@ public class OrttoFlutterSdkPlugin: NSObject, FlutterPlugin, UNUserNotificationC
             initializeCapture(call)
             result(nil)
         case "identify":
-            identify(call)
-            result(nil)
+            identify(call, result)
         case "clearData":
             clearData()
             result(nil)
@@ -73,12 +72,14 @@ public class OrttoFlutterSdkPlugin: NSObject, FlutterPlugin, UNUserNotificationC
         }
     }
 
-    private func identify(_ call: FlutterMethodCall) {
+    private func identify(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
         if let userData = call.arguments as? [String:Any?] {
             var user = UserIdentifier(contactID: userData["contact_id"] as? String, email: userData["email"] as? String, phone: userData["phone"] as? String, externalID: userData["external_id"] as? String, firstName: userData["first_name"] as? String, lastName: userData["last_name"] as? String)
             user.acceptsGDPR = userData["accepts_gdpr"] as? Bool ?? false;
 
-            Ortto.shared.identify(user)
+            Ortto.shared.identify(user) { response in
+                result(nil)
+            }
         }
     }
 

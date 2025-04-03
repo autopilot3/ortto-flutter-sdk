@@ -31,19 +31,24 @@ void main() async {
   const uuid = Uuid();
   final user = UserID(externalId: uuid.v4(), email: 'example@ortto.com');
   await Ortto.instance.identify(user);
-  await Ortto.instance.dispatchPushRequest();
 
+  // Uncomment if you need to automatically register device token
+  // await Ortto.instance.dispatchPushRequest();
+
+  // Set up Firebase Messaging
   FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
       badge: true,
       alert: true,
       sound: true
   );
 
+  // Use registerDeviceToken to register the device token manually
   final fcmToken = await FirebaseMessaging.instance.getToken();
   if (fcmToken != null) {
     Ortto.instance.registerDeviceToken(fcmToken);
   }
 
+  // Handle foreground messages
   FirebaseMessaging.onMessage.listen((RemoteMessage message) {
     Ortto.instance
       .onbackgroundMessageReceived(message.toMap())
@@ -53,6 +58,7 @@ void main() async {
       });
   });
 
+  // Register background message handler
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
   runApp(const MyApp());
@@ -64,6 +70,7 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
+  // Pass the received background message to Ortto SDK
   Ortto.instance
     .onbackgroundMessageReceived(message.toMap())
     .then((handled) {

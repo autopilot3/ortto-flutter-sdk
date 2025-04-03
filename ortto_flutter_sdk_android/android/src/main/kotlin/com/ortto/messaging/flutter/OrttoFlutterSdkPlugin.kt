@@ -46,7 +46,7 @@ class OrttoFlutterSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             "getPlatformName" -> result.success(getPlatformName())
             "initialize" -> result.success(initialize(call))
             "initializeCapture" -> result.success(initializeCapture(call))
-            "identify" -> result.success(identify(call))
+            "identify" -> identify(call, result),
             "requestPermissions" -> requestPermissions(result)
             "onMessageReceived" -> onMessageReceived(call)
             "queueWidget" -> {
@@ -107,7 +107,7 @@ class OrttoFlutterSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         return null;
     }
 
-    private fun identify(call: MethodCall): Unit? {
+    private fun identify(call: MethodCall, result: MethodChannel.Result): Unit? {
         val user = UserID.make();
         user.firstName = call.argument("firstName");
         user.lastName = call.argument("lastName");
@@ -117,7 +117,15 @@ class OrttoFlutterSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         user.phone = call.argument("phone");
         user.externalId = call.argument("externalId");
 
-        Ortto.instance().identify(user);
+        Ortto.instance().identify(user, object : Ortto.OnIdentifyListener {
+            override fun onComplete() {
+                result.success(null)
+            }
+
+            override fun onError(error: String) {
+                result.error("IDENTIFY_ERROR", error, null)
+            }
+        })
 
         return null;
     }
