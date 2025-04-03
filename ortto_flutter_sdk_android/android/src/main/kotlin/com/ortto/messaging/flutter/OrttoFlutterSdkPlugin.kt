@@ -4,6 +4,7 @@ import android.app.Activity
 import android.app.Application
 import android.content.Context
 import android.util.Log
+import java.lang.Exception
 import com.google.firebase.messaging.RemoteMessage
 import com.ortto.messaging.Ortto
 import com.ortto.messaging.OrttoConfig
@@ -41,12 +42,13 @@ class OrttoFlutterSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         applicationContext = flutterPluginBinding.applicationContext
     }
 
+
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
         when (call.method) {
             "getPlatformName" -> result.success(getPlatformName())
             "initialize" -> result.success(initialize(call))
             "initializeCapture" -> result.success(initializeCapture(call))
-            "identify" -> identify(call, result),
+            "identify" -> identify(call, result)
             "requestPermissions" -> requestPermissions(result)
             "onMessageReceived" -> onMessageReceived(call)
             "queueWidget" -> {
@@ -122,8 +124,8 @@ class OrttoFlutterSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 result.success(null)
             }
 
-            override fun onError(error: String) {
-                result.error("IDENTIFY_ERROR", error, null)
+            override fun onError(error: Throwable) {
+                result.error("IDENTIFY_ERROR", error.message ?: "Unknown identify error", error.stackTraceToString())
             }
         })
 
