@@ -1,3 +1,6 @@
+## 0.4.5
+* Fixes an issue with the identify callback signature
+
 ## 0.4.4
 * Updates android SDK to version v1.8.4
 * allow appContext to be null in permission call
