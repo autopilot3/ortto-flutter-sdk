@@ -1,3 +1,6 @@
+## 0.4.6
+* Update ortto_flutter_sdk_android to 0.4.6
+
 ## 0.4.5
 * Update ortto_flutter_sdk_android to 0.4.5
 

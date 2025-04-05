@@ -1,3 +1,6 @@
+## 0.4.6
+* Updates android SDK to version v1.8.5
+
 ## 0.4.5
 * Fixes an issue with the identify callback signature
 
