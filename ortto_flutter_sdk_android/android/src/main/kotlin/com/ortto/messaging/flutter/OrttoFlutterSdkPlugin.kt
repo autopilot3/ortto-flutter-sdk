@@ -12,6 +12,7 @@ import com.ortto.messaging.PermissionUtil
 import com.ortto.messaging.data.LinkUtm
 import com.ortto.messaging.identity.UserID
 import com.ortto.messaging.widget.CaptureConfig
+import com.ortto.messaging.retrofit.RegistrationResponse
 import com.ortto.messaging.PushNotificationHandler
 import com.ortto.messaging.OrttoCaptureInitException
 
@@ -194,28 +195,26 @@ class OrttoFlutterSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     }
 
     private fun showWidget(call: MethodCall, result: MethodChannel.Result) {
-        val widgetId = call.argument<String>("widgetId");
+        val widgetId = call.argument<String>("widgetId")
 
-        try {
-            Ortto.instance().showWidget(widgetId)
-
-            val widgetResult = mapOf(
-                "success" to true,
-                "message" to "Widget shown successfully."
-            )
-
-            result.success(widgetResult)
-        } catch (e: OrttoCaptureInitException) {
-            // Handle the exception here
-            e.printStackTrace()
-
-            val widgetResult = mapOf(
-                "success" to false,
-                "message" to e.message
-            )
-
-            result.success(widgetResult)
+        if (widgetId == null) {
+            result.error("INVALID_ARGUMENT", "widgetId is null", null)
+            return
         }
+
+        Ortto.instance().showWidget(widgetId, object : Ortto.WidgetCallback {
+            override fun onSuccess() {
+                val widgetResult = mapOf(
+                    "success" to true,
+                    "message" to "Widget shown successfully."
+                )
+                result.success(widgetResult)
+            }
+
+            override fun onFailure(t: Throwable) {
+                result.error("WIDGET_SHOW_FAILED", t.message, t.stackTraceToString())
+            }
+        })
     }
 
     private fun processNextWidgetFromQueue() {
@@ -279,9 +278,15 @@ class OrttoFlutterSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     }
 
     private fun clearIdentity(result: MethodChannel.Result) {
-        Ortto.instance().clearIdentity() {
-            val responseMap = mapOf("sessionId" to it.sessionId)
-            result.success(responseMap)
-        }
+        Ortto.instance().clearIdentity(object : Ortto.ClearIdentityCallback {
+            override fun onSuccess(response: RegistrationResponse) {
+                Log.d(tag, "clearIdentity.onSuccess: ${response.sessionId}")
+                result.success(mapOf("sessionId" to response.sessionId))
+            }
+
+            override fun onFailure(error: Throwable) {
+                result.error("IDENTITY_ERROR", error.message, error.stackTraceToString())
+            }
+        })
     }
 }
