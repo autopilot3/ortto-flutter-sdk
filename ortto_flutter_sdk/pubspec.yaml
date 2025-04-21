@@ -27,7 +27,7 @@ dependencies:
   ortto_flutter_sdk_platform_interface: ^0.4.0
 #  ortto_flutter_sdk_platform_interface:
 #    path: ../ortto_flutter_sdk_platform_interface
-  ortto_flutter_sdk_ios: ^0.3.6
+  ortto_flutter_sdk_ios: ^0.4.0
 #  ortto_flutter_sdk_ios:
 #    path: ../ortto_flutter_sdk_ios
 
