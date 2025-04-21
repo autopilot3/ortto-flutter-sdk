@@ -1,3 +1,6 @@
+## 0.4.0
+* Return Future<IdentityResult> for clearIdentity() and handle failures better for showWidget()
+
 ## 0.3.3
 * Returns Future<WidgetResult> instead of void for showWidget(widgetId)
 
