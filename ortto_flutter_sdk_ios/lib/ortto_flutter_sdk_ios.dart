@@ -74,13 +74,6 @@ class OrttoFlutterSdkIOS extends OrttoFlutterSdkPlatformInterface {
   }
 
   @override
-  Future<WidgetResult> showWidget(String widgetId) {
-    return methodChannel.invokeMethod("showWidget", {
-      'widgetId': widgetId,
-    }).then((value) => WidgetResult.fromMap(value.cast<String, dynamic>()));
-  }
-
-  @override
   Future<void> processNextWidgetFromQueue() {
     return methodChannel.invokeMethod('processNextWidgetFromQueue');
   }
@@ -95,10 +88,33 @@ class OrttoFlutterSdkIOS extends OrttoFlutterSdkPlatformInterface {
     return result;
   }
 
+  @override
+  Future<WidgetResult> showWidget(String widgetId) async {
+    final result = await methodChannel.invokeMethod("showWidget", {
+      'widgetId': widgetId,
+    });
+
+    if (result is Map) {
+      final map = result.cast<String, dynamic>();
+      if (map['success'] == true) {
+        return WidgetResult.fromMap(map);
+      } else {
+        throw Exception(map['message'] ?? 'Failed to show widget');
+      }
+    } else {
+      throw Exception("Invalid response type: ${result.runtimeType}");
+    }
+  }
+
   Future<IdentityResult> clearIdentity() async {
     final response = await methodChannel.invokeMethod('clearIdentity');
     if (response != null) {
       final Map<String, dynamic> responseMap = (response as Map).cast<String, dynamic>();
+
+      if (responseMap['success'] != true) {
+        throw Exception(responseMap['message'] ?? "Failed to clear identity");
+      }
+
       return IdentityResult.fromMap(responseMap);
     } else {
       throw Exception("Failed to clear identity");

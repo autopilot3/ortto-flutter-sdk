@@ -1,35 +1,50 @@
-import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:ortto_flutter_sdk/ortto_flutter_sdk.dart';
 import 'package:uuid/uuid.dart';
 import 'firebase_options.dart';
 
+class AppConfig {
+  static const String orttoAppKey = "<APP_KEY>";
+  static const String orttoAppEndpoint = "<APP_ENDPOINT>";
+  static const String orttoDatasourceKey = "<DATA_SOURCE_KEY>";
+  static const String orttoCaptureJsUrl = "<CAPTURE_JS_URL>";
+  static const String orttoApiHost = "<API_HOST>";
+  static const String widgetId = "<WIDGET_ID>";
+}
+
 void main() async {
+  // Ensure that plugin services are initialized
   WidgetsFlutterBinding.ensureInitialized();
 
+  // Initialize Firebase
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
+  // Set up Firebase Messaging
   FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(badge: true, alert: true, sound: true);
 
+  // Initialize Ortto SDK
   await Ortto.instance.init(
-    appKey: '<APP_KEY>',
-    endpoint: '<APP_ENDPOINT>',
+    appKey: AppConfig.orttoAppKey,
+    endpoint: AppConfig.orttoAppEndpoint,
   );
 
+  // Initialize Ortto Capture (not required)
   await Ortto.instance.initCapture(
-    dataSourceKey: '<DATA_SOURCE_KEY>',
-    captureJsUrl: '<CAPTURE_JS_URL>',
-    apiHost: '<API_HOST>',
+    dataSourceKey: AppConfig.orttoDatasourceKey,
+    captureJsUrl: AppConfig.orttoCaptureJsUrl,
+    apiHost: AppConfig.orttoAppEndpoint,
   );
 
+  // Set up Ortto User to identify
   const uuid = Uuid();
-  final user = UserID(externalId: uuid.v4(), email: 'example@ortto.com');
+  final user = UserID(externalId: uuid.v4(), email: 'joe@ortto.com');
+
+  // Identify the user
   await Ortto.instance.identify(user);
 
   // Uncomment if you need to automatically register device token
@@ -64,6 +79,7 @@ void main() async {
   runApp(const MyApp());
 }
 
+// This is the background message handler
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp(
@@ -105,11 +121,8 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  String? _platformName;
-  String? _permission;
-  bool _pushInitialized = true;
-  bool _captureInitialized = true;
-  final String widgetId = '64b87236c1d0dbd9461a2515';
+
+  final String widgetId = AppConfig.widgetId;
 
   @override
   Widget build(BuildContext context) {
@@ -122,31 +135,33 @@ class _HomePageState extends State<HomePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-
             ElevatedButton(
               onPressed: () async {
-                // if (!_captureInitialized) {
-                //   return;
-                // }
+                Ortto.instance.clearIdentity()
+                  .then((value) {
+                    print("Cleared identity");
+                  })
+                  .catchError((error) {
+                    print(error);
+                  });
+              },
+              child: const Text('Clear Identity'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    backgroundColor: Theme.of(context).primaryColor,
+                    content: Text('Should show widget!'),
+                  ),
+                );
 
-                try {
-                  // await
-                  Ortto.instance.showWidget('<WIDGET_ID>');
-
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      backgroundColor: Theme.of(context).primaryColor,
-                      content: Text('Should show widget!'),
-                    ),
-                  );
-                } catch (error) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      backgroundColor: Theme.of(context).primaryColor,
-                      content: Text('$error'),
-                    ),
-                  );
-                }
+                Ortto.instance.showWidget(widgetId)
+                  .then((value) {
+                    print("Widget shown successfully");
+                  }).catchError((error) {
+                    print("Error showing widget: $error");
+                  });
               },
               child: const Text('Show Widget'),
             ),

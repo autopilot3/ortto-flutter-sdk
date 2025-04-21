@@ -1,11 +1,9 @@
 class IdentityResult {
-  final String sessionId;
+  final String? sessionId;
 
-  IdentityResult({required this.sessionId});
+  IdentityResult({this.sessionId});
 
   factory IdentityResult.fromMap(Map<String, dynamic> map) {
-    return IdentityResult(
-      sessionId: map['session_id'] as String? ?? '',
-    );
+    return IdentityResult(sessionId: map['sessionId']);
   }
 }

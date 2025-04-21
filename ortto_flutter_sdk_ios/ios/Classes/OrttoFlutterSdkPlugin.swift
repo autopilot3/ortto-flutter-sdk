@@ -93,43 +93,6 @@ public class OrttoFlutterSdkPlugin: NSObject, FlutterPlugin, UNUserNotificationC
         }
     }
 
-    private func showWidget(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
-        guard let args = call.arguments as? [String:Any?] else {
-            result(["message": "invalid_arguments", "success": false])
-            return
-        }
-
-        guard let widgetId = args["widgetId"] as? String else {
-            result(["message": "missing_widget_id", "success": false])
-            return
-        }
-
-        guard OrttoCapture.shared != nil else {
-            result(["message": "ortto_capture_not_initialized", "success": false])
-            return
-        }
-
-        OrttoCapture.shared.showWidget(widgetId).then { showResult in
-            switch showResult {
-            case .success:
-                result(["success": true])
-            case .failure(let error):
-                print("error: \(error)")
-                if let widgetError = error as? WidgetError {
-                    result([
-                        "message": widgetError.errorDescription,
-                        "success": false
-                    ])
-                } else {
-                    result([
-                        "message": error.localizedDescription,
-                        "success": false
-                    ])
-                }
-            }
-        }
-    }
-
     private func registerDeviceToken(_ call: FlutterMethodCall) {
         guard let args = call.arguments as? [String:Any?] else {
             return
@@ -197,17 +160,61 @@ public class OrttoFlutterSdkPlugin: NSObject, FlutterPlugin, UNUserNotificationC
         }
     }
 
+    private func showWidget(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
+        guard let args = call.arguments as? [String: Any],
+              let widgetId = args["widgetId"] as? String else {
+            result([
+                "success": false,
+                "message": "Invalid or missing widgetId"
+            ])
+            return
+        }
+
+        guard let capture = OrttoCapture.shared else {
+            result([
+                "success": false,
+                "message": "OrttoCapture not initialized"
+            ])
+            return
+        }
+
+        capture.showWidget(widgetId).then { showResult in
+            switch showResult {
+            case .success:
+                result([
+                    "success": true,
+                    "message": "Widget shown successfully"
+                ])
+            case .failure(let error):
+                if let widgetError = error as? WidgetError {
+                    result([
+                        "success": false,
+                        "message": widgetError.errorDescription ?? "Widget error"
+                    ])
+                } else {
+                    result([
+                        "success": false,
+                        "message": error.localizedDescription
+                    ])
+                }
+            }
+        }
+    }
+
     public func clearIdentity(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
         Ortto.shared.clearIdentity { response in
-            guard let response = response else {
-                result(nil)
-                return
+            if let response = response {
+                let responseDict: [String: Any] = [
+                    "sessionId": response.sessionId,
+                    "success": true
+                ]
+                result(responseDict)
+            } else {
+                result([
+                    "success": false,
+                    "message": "No identity found or failed to unregister"
+                ])
             }
-
-            let responseDict: [String: Any] = [
-                "session_id": response.sessionId
-            ]
-            result(responseDict)
         }
     }
 }
