@@ -1,3 +1,6 @@
+## 0.4.7
+* Updates android SDK to version v1.8.6
+
 ## 0.4.6
 * Updates android SDK to version v1.8.5
 
