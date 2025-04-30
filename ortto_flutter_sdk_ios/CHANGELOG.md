@@ -1,3 +1,6 @@
+## 0.4.1
+* Update Ortto iOS SDK to v1.7.1
+
 ## 0.4.0
 * Update Ortto SDK to v1.7.0
 

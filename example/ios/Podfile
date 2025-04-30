@@ -42,7 +42,7 @@ target 'NotificationServiceExtension' do
   use_frameworks!
   use_modular_headers!
 
-  pod 'OrttoPushMessagingFCM', '1.7.0'
+  pod 'OrttoPushMessagingFCM', '1.7.1'
 #   pod 'OrttoPushMessagingFCM', :path => '../../../ios-sdk'
 
     # The below line must be commented out after xcode~13
