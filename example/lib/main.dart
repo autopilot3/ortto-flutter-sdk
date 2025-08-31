@@ -33,12 +33,16 @@ void main() async {
     endpoint: AppConfig.orttoAppEndpoint,
   );
 
+  final token = (await FirebaseMessaging.instance.getToken())!;
+
   // Initialize Ortto Capture (not required)
   await Ortto.instance.initCapture(
     dataSourceKey: AppConfig.orttoDatasourceKey,
     captureJsUrl: AppConfig.orttoCaptureJsUrl,
     apiHost: AppConfig.orttoAppEndpoint,
   );
+
+  await Ortto.instance.requestPermissions();
 
   // Set up Ortto User to identify
   const uuid = Uuid();
