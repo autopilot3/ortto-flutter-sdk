@@ -1,3 +1,6 @@
+## 0.5.0
+- Expand firebase_messaging support to >=14.6.5 <17.0.0
+
 ## 0.4.8
 * Update ortto_flutter_sdk_ios to 0.4.1
 * Update ortto_flutter_sdk_android to 0.4.8
