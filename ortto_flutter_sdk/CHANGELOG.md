@@ -1,3 +1,6 @@
+## 0.6.0
+* Update Ortto iOS SDK to 1.8.2 to support Firebase Messaging 11.x
+
 ## 0.5.0
 - Expand firebase_messaging support to >=14.6.5 <17.0.0
 
