@@ -10,7 +10,7 @@ dependencies:
   firebase_messaging: ^14.7.10
   flutter:
     sdk: flutter
-  ortto_flutter_sdk: ^0.4.8
+  ortto_flutter_sdk: ^0.6.0
 #  ortto_flutter_sdk:
 #    path: ../ortto_flutter_sdk
   uuid: ^3.0.6
