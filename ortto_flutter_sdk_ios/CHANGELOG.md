@@ -1,3 +1,6 @@
+## 0.6.1
+* Fixes minimum version issue for ios 15
+
 ## 0.6.0
 * Update Ortto SDK to 1.8.2 to support Firebase Messaging 11.x
 
