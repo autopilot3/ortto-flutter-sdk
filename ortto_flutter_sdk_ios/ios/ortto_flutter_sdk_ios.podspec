@@ -9,7 +9,7 @@ Pod::Spec.new do |s|
   s.source_files      = 'Classes/**/*'
   s.documentation_url = 'https://help.ortto.com/developer/latest/developer-guide/push-sdks/'
   s.ios.deployment_target = '15.0'
-  s.platform          = :ios
+  s.platform          = :ios, '15.0'
 
   # Flutter.framework does not contain a i386 slice.
   s.pod_target_xcconfig = { 'DEFINES_MODULE' => 'YES', 'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'i386' }
@@ -17,7 +17,7 @@ Pod::Spec.new do |s|
 
   # Dependencies
   s.dependency 'Flutter'
-  s.dependency 'OrttoSDKCore', '1.8.2'
-  s.dependency 'OrttoInAppNotifications', '1.8.2'
-  s.dependency 'OrttoPushMessagingFCM', '1.8.2'
+  s.dependency 'OrttoSDKCore', '1.8.3'
+  s.dependency 'OrttoInAppNotifications', '1.8.3'
+  s.dependency 'OrttoPushMessagingFCM', '1.8.3'
 end
