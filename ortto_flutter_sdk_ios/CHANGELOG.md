@@ -1,3 +1,6 @@
+## 0.6.2
+* Update Ortto iOS SDK to v1.8.4
+
 ## 0.6.1
 * Fixes minimum version issue for ios 15
 
