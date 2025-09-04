@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name              = 'ortto_flutter_sdk_ios'
-  s.version           = '1.8.2'
+  s.version           = '1.8.4'
   s.summary           = 'OrttoSDK'
   s.homepage          = 'https://github.com/autopilot3/ortto-push-ios-sdk'
   s.license           = { :type => 'MIT', :file => 'LICENSE' }
@@ -17,7 +17,7 @@ Pod::Spec.new do |s|
 
   # Dependencies
   s.dependency 'Flutter'
-  s.dependency 'OrttoSDKCore', '1.8.3'
-  s.dependency 'OrttoInAppNotifications', '1.8.3'
-  s.dependency 'OrttoPushMessagingFCM', '1.8.3'
+  s.dependency 'OrttoSDKCore', '1.8.4'
+  s.dependency 'OrttoInAppNotifications', '1.8.4'
+  s.dependency 'OrttoPushMessagingFCM', '1.8.4'
 end
