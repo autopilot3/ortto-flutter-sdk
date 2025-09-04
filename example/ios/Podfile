@@ -1,5 +1,5 @@
 # Uncomment this line to define a global platform for your project
-platform :ios, '13.0'
+platform :ios, '15.0'
 
 # CocoaPods analytics sends network stats synchronously affecting flutter build latency.
 ENV['COCOAPODS_DISABLE_STATS'] = 'true'
@@ -29,24 +29,24 @@ flutter_ios_podfile_setup
 
 target 'Runner' do
   use_frameworks!
-  use_modular_headers!
+  # use_modular_headers!
 
-#   pod 'OrttoSDKCore', :path => '../../../ios-sdk'
-#   pod 'OrttoPushMessagingFCM', :path => '../../../ios-sdk'
-#   pod 'OrttoInAppNotifications', :path => '../../../ios-sdk'
+  # pod 'OrttoSDKCore', :path => '../../../ios-sdk'
+  # pod 'OrttoPushMessagingFCM', :path => '../../../ios-sdk'
+  # pod 'OrttoInAppNotifications', :path => '../../../ios-sdk'
 
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
 end
 
 target 'NotificationServiceExtension' do
   use_frameworks!
-  use_modular_headers!
+  # use_modular_headers!
 
-  pod 'OrttoPushMessagingFCM', '1.7.1'
-#   pod 'OrttoPushMessagingFCM', :path => '../../../ios-sdk'
+  pod 'OrttoPushMessagingFCM', '1.8.3'
+  # pod 'OrttoPushMessagingFCM', :path => '../../../ios-sdk'
 
-    # The below line must be commented out after xcode~13
-#   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
+  # The below line must be commented out after xcode~13
+  # flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
 end
 
 
