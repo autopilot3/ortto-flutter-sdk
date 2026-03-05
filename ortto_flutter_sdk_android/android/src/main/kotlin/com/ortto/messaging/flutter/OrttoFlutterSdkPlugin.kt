@@ -51,7 +51,7 @@ class OrttoFlutterSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             "initializeCapture" -> result.success(initializeCapture(call))
             "identify" -> identify(call, result)
             "requestPermissions" -> requestPermissions(result)
-            "onMessageReceived" -> onMessageReceived(call)
+            "onMessageReceived" -> result.success(onMessageReceived(call))
             "queueWidget" -> {
                 queueWidget(call)
                 result.success(null)
@@ -86,7 +86,6 @@ class OrttoFlutterSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             call.argument("appKey"),
             call.argument("endpoint"),
             call.argument("shouldSkipNonExistingContacts"),
-            call.argument("allowAnonUsers"),
         )
 
         Ortto.instance().init(config, this.applicationContext as Application)
