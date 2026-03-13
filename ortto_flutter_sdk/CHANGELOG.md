@@ -1,3 +1,7 @@
+## 0.6.3
+* Update ortto_flutter_sdk_android to 0.4.9
+* Fix background push notifications failing after the first message on Android
+
 ## 0.6.1
 * Bump minimum iOS version to 15.0 to resolve build issues
 

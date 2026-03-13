@@ -1,3 +1,7 @@
+## 0.4.9
+* Fix onMessageReceived not returning result to Dart, causing background push handlers to hang and block subsequent messages
+* Use non-deprecated OrttoConfig constructor (3-param instead of 4-param)
+
 ## 0.4.8
 * Updates android SDK to version v1.8.7
 
