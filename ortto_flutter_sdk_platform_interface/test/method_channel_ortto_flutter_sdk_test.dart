@@ -31,7 +31,40 @@ void main() {
       'appKey': 'app-key',
       'endpoint': 'https://example.test',
       'shouldSkipNonExistingContacts': false,
-      'allowAnonUsers': false,
+    });
+  });
+
+  test('identity uses canonical native channel keys', () {
+    final user = UserID(
+      firstName: 'Ada',
+      lastName: 'Lovelace',
+      acceptsGdpr: true,
+      contactId: 'contact-id',
+      email: 'ada@example.test',
+      externalId: 'external-id',
+      phone: '+61000000000',
+    );
+
+    expect(user.toMap(), <String, dynamic>{
+      'first_name': 'Ada',
+      'last_name': 'Lovelace',
+      'accepts_gdpr': true,
+      'contact_id': 'contact-id',
+      'email': 'ada@example.test',
+      'external_id': 'external-id',
+      'phone': '+61000000000',
+    });
+  });
+
+  test('partial identity preserves canonical keys and null values', () {
+    expect(UserID(email: 'ada@example.test').toMap(), <String, dynamic>{
+      'first_name': null,
+      'last_name': null,
+      'accepts_gdpr': false,
+      'contact_id': null,
+      'email': 'ada@example.test',
+      'external_id': null,
+      'phone': null,
     });
   });
 

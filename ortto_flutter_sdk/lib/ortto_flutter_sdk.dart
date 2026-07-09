@@ -24,13 +24,11 @@ class Ortto {
     required String appKey, 
     required String endpoint,
     bool shouldSkipNonExistingContacts = false,
-    bool allowAnonUsers = false,
   }) {
     final config = OrttoConfig(
       appKey, 
       endpoint, 
       shouldSkipNonExistingContacts: shouldSkipNonExistingContacts, 
-      allowAnonUsers: allowAnonUsers,
     );
 
     return _platform.initialize(config);

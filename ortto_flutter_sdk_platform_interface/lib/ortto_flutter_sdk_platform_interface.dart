@@ -81,4 +81,3 @@ abstract class OrttoFlutterSdkPlatformInterface extends PlatformInterface {
 
   Future<IdentityResult> clearIdentity();
 }
-

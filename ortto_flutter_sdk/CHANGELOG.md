@@ -1,3 +1,7 @@
+## Next
+
+* **Breaking:** Remove the unused `allowAnonUsers` initialization argument. It was never forwarded to either native SDK; callers should omit it.
+
 ## 0.6.3
 * Update ortto_flutter_sdk_android to 0.4.9
 * Fix background push notifications failing after the first message on Android
