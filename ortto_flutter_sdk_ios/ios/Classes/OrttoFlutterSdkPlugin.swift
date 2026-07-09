@@ -224,7 +224,7 @@ public class OrttoFlutterSdkPlugin: NSObject, FlutterPlugin, UNUserNotificationC
     }
 
     private func onMessageReceived(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
-        result(true)
+        result(false)
     }
 
     private func processNextWidgetFromQueue() {

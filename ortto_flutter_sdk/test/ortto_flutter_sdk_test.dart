@@ -4,11 +4,15 @@ import 'package:ortto_flutter_sdk_platform_interface/ortto_flutter_sdk_platform_
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+  final platform = RecordingPlatform();
+
+  setUpAll(() {
+    OrttoFlutterSdkPlatformInterface.instance = platform;
+  });
+
+  setUp(platform.reset);
 
   test('init delegates the complete configuration to the platform', () async {
-    final platform = RecordingPlatform();
-    OrttoFlutterSdkPlatformInterface.instance = platform;
-
     await Ortto.instance.init(
       appKey: 'app-key',
       endpoint: 'https://example.test',
@@ -21,10 +25,44 @@ void main() {
       'shouldSkipNonExistingContacts': true,
     });
   });
+
+  test('background notification payload suppresses duplicate display', () async {
+    await Ortto.instance.onBackgroundMessageReceived(<String, dynamic>{
+      'notification': <String, dynamic>{'title': 'Already displayed by FCM'},
+      'data': <String, dynamic>{'ortto': 'payload'},
+    });
+
+    expect(platform.handleNotificationTrigger, isFalse);
+  });
+
+  test('background data-only payload enables notification display', () async {
+    await Ortto.instance.onBackgroundMessageReceived(<String, dynamic>{
+      'data': <String, dynamic>{'ortto': 'payload'},
+    });
+
+    expect(platform.handleNotificationTrigger, isTrue);
+  });
+
+  test('foreground caller can explicitly enable notification display', () async {
+    await Ortto.instance.onBackgroundMessageReceived(
+      <String, dynamic>{
+        'notification': <String, dynamic>{'title': 'Foreground'},
+      },
+      handleNotificationTrigger: true,
+    );
+
+    expect(platform.handleNotificationTrigger, isTrue);
+  });
 }
 
 class RecordingPlatform extends OrttoFlutterSdkPlatformInterface {
   OrttoConfig? configuration;
+  bool? handleNotificationTrigger;
+
+  void reset() {
+    configuration = null;
+    handleNotificationTrigger = null;
+  }
 
   @override
   Future<void> initialize(OrttoConfig config) async {
@@ -60,6 +98,15 @@ class RecordingPlatform extends OrttoFlutterSdkPlatformInterface {
 
   @override
   Future<void> processNextWidgetFromQueue() async {}
+
+  @override
+  Future<bool> onMessageReceived(
+    Map<String, dynamic> message, {
+    bool handleNotificationTrigger = true,
+  }) async {
+    this.handleNotificationTrigger = handleNotificationTrigger;
+    return true;
+  }
 
   @override
   Future<String?> getPlatformName() async => 'test';

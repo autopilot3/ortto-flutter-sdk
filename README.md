@@ -77,7 +77,7 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   );
 
   Ortto.instance
-    .onbackgroundMessageReceived(message.toMap())
+    .onBackgroundMessageReceived(message.toMap())
     .then((handled) {
       return handled;
     });

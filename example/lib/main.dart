@@ -70,7 +70,10 @@ void main() async {
   // Handle foreground messages
   FirebaseMessaging.onMessage.listen((RemoteMessage message) {
     Ortto.instance
-      .onbackgroundMessageReceived(message.toMap())
+      .onBackgroundMessageReceived(
+        message.toMap(),
+        handleNotificationTrigger: true,
+      )
       .then((handled) {
         print("handled $handled");
         return handled;
@@ -92,7 +95,7 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 
   // Pass the received background message to Ortto SDK
   Ortto.instance
-    .onbackgroundMessageReceived(message.toMap())
+    .onBackgroundMessageReceived(message.toMap())
     .then((handled) {
       return handled;
     });
