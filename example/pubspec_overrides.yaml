@@ -1,0 +1,13 @@
+# Local development overrides — the example app runs against the live local
+# packages in this repo. Overrides only apply at the resolution root, so the
+# transitive ortto packages must be listed here too, not just ortto_flutter_sdk.
+# See note in ortto_flutter_sdk/pubspec_overrides.yaml.
+dependency_overrides:
+  ortto_flutter_sdk:
+    path: ../ortto_flutter_sdk
+  ortto_flutter_sdk_platform_interface:
+    path: ../ortto_flutter_sdk_platform_interface
+  ortto_flutter_sdk_ios:
+    path: ../ortto_flutter_sdk_ios
+  ortto_flutter_sdk_android:
+    path: ../ortto_flutter_sdk_android
