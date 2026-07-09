@@ -34,4 +34,41 @@ void main() {
       containsPair('shouldSkipNonExistingContacts', true),
     );
   });
+
+  test('identify sends every canonical identity field', () async {
+    harness.respondWith(null);
+
+    await platform.identify(UserID(
+      firstName: 'Ada',
+      lastName: 'Lovelace',
+      acceptsGdpr: true,
+      contactId: 'contact-id',
+      email: 'ada@example.test',
+      externalId: 'external-id',
+      phone: '+61000000000',
+    ));
+
+    expect(harness.singleCall.method, 'identify');
+    expect(harness.singleCall.arguments, <String, dynamic>{
+      'first_name': 'Ada',
+      'last_name': 'Lovelace',
+      'accepts_gdpr': true,
+      'contact_id': 'contact-id',
+      'email': 'ada@example.test',
+      'external_id': 'external-id',
+      'phone': '+61000000000',
+    });
+  });
+
+  test('identify propagates native failures', () async {
+    harness.respond((_) async => throw PlatformException(
+          code: 'IDENTIFY_ERROR',
+          message: 'native failure',
+        ));
+
+    await expectLater(
+      platform.identify(UserID(email: 'ada@example.test')),
+      throwsA(isA<PlatformException>()),
+    );
+  });
 }

@@ -25,7 +25,7 @@ class UserID {
       'contact_id': contactId,
       'email': email,
       'external_id': externalId,
-      'phone_number': phone,
+      'phone': phone,
     };
   }
 }

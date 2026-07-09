@@ -16,8 +16,7 @@ public class OrttoFlutterSdkPlugin: NSObject, FlutterPlugin, UNUserNotificationC
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         switch call.method {
         case "initialize":
-            initialize(call)
-            result(nil)
+            initialize(call, result)
         case "initializeCapture":
             initializeCapture(call)
             result(nil)
@@ -53,13 +52,24 @@ public class OrttoFlutterSdkPlugin: NSObject, FlutterPlugin, UNUserNotificationC
         }
     }
 
-    private func initialize(_ call: FlutterMethodCall) {
-        if let configMap = call.arguments as? [String:Any?] {
-            Ortto.initialize(
-                appKey: (configMap["appKey"] as? String)!,
-                endpoint: configMap["endpoint"] as? String
-            );
+    private func initialize(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
+        guard let configMap = call.arguments as? [String: Any?],
+              let appKey = configMap["appKey"] as? String,
+              !appKey.isEmpty else {
+            result(FlutterError(
+                code: "INVALID_ARGUMENTS",
+                message: "initialize requires a non-empty appKey",
+                details: nil
+            ))
+            return
         }
+
+        Ortto.initialize(
+            appKey: appKey,
+            endpoint: configMap["endpoint"] as? String,
+            shouldSkipNonExistingContacts: configMap["shouldSkipNonExistingContacts"] as? Bool ?? false
+        )
+        result(nil)
     }
 
     private func initializeCapture(_ call: FlutterMethodCall) {
@@ -73,12 +83,35 @@ public class OrttoFlutterSdkPlugin: NSObject, FlutterPlugin, UNUserNotificationC
     }
 
     private func identify(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
-        if let userData = call.arguments as? [String:Any?] {
-            var user = UserIdentifier(contactID: userData["contact_id"] as? String, email: userData["email"] as? String, phone: userData["phone"] as? String, externalID: userData["external_id"] as? String, firstName: userData["first_name"] as? String, lastName: userData["last_name"] as? String)
-            user.acceptsGDPR = userData["accepts_gdpr"] as? Bool ?? false;
+        guard let userData = call.arguments as? [String: Any?] else {
+            result(FlutterError(
+                code: "INVALID_ARGUMENTS",
+                message: "identify requires an identity map",
+                details: nil
+            ))
+            return
+        }
 
-            Ortto.shared.identify(user) { response in
+        var user = UserIdentifier(
+            contactID: userData["contact_id"] as? String,
+            email: userData["email"] as? String,
+            phone: userData["phone"] as? String,
+            externalID: userData["external_id"] as? String,
+            firstName: userData["first_name"] as? String,
+            lastName: userData["last_name"] as? String
+        )
+        user.acceptsGDPR = userData["accepts_gdpr"] as? Bool ?? false
+
+        Ortto.shared.identify(user) { response in
+            switch response {
+            case .success:
                 result(nil)
+            case .failure(let error):
+                result(FlutterError(
+                    code: "IDENTIFY_ERROR",
+                    message: error.localizedDescription,
+                    details: String(describing: error)
+                ))
             }
         }
     }

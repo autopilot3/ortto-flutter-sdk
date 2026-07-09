@@ -19,7 +19,6 @@ void main() {
       'appKey': 'app-key',
       'endpoint': 'https://example.test',
       'shouldSkipNonExistingContacts': true,
-      'allowAnonUsers': false,
     });
   });
 }
