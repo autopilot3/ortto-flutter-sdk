@@ -164,31 +164,74 @@ public class OrttoFlutterSdkPlugin: NSObject, FlutterPlugin, UNUserNotificationC
             return
         }
 
-        Ortto.shared.trackLinkClick(link) {}
-
-        guard let uri = URL(string: link),
-              let components = URLComponents(string: uri.absoluteString) else {
+        guard let components = URLComponents(string: link),
+              components.scheme != nil else {
             result(FlutterError(code: "INVALID_LINK", message: "The link is malformed", details: link))
             return
         }
-        let queryItems = components.queryItems ?? []
 
-        var linkUtm: [String: String] = queryItems.reduce(into: [String: String]()) { (result, item) in
-            switch item.name {
-            case "utm_campaign":
-                result[item.name] = item.value
-            case "utm_source":
-                result[item.name] = item.value
-            case "utm_medium":
-                result[item.name] = item.value
-            case "utm_content":
-                result[item.name] = item.value
-            default:
-                result
+        let trackingValue = components.queryItems?.first(where: { $0.name == "tracking_url" })?.value
+        let utmSource = trackingValue.flatMap(decodeBase64URL) ?? link
+
+        let linkUtm = Ortto.shared.retrieveUtmParameters(utmSource) ?? LinkUtm([])
+
+        let response = linkUtmMap(linkUtm)
+        guard trackingValue != nil else {
+            result(response)
+            return
+        }
+
+        var completed = false
+        let complete: (Any) -> Void = { value in
+            DispatchQueue.main.async {
+                guard !completed else { return }
+                completed = true
+                result(value)
             }
         }
 
-        result(linkUtm)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 30) {
+            guard !completed else { return }
+            completed = true
+            result(FlutterError(
+                code: "TRACKING_ERROR",
+                message: "Link tracking did not complete",
+                details: link
+            ))
+        }
+
+        Ortto.shared.trackLinkClick(link) {
+            complete(response)
+        }
+    }
+
+    private func decodeBase64URL(_ value: String) -> String? {
+        var base64 = value
+            .replacingOccurrences(of: "-", with: "+")
+            .replacingOccurrences(of: "_", with: "/")
+        let remainder = base64.count % 4
+        if remainder != 0 {
+            base64.append(String(repeating: "=", count: 4 - remainder))
+        }
+
+        guard let data = Data(base64Encoded: base64) else { return nil }
+        return String(data: data, encoding: .utf8)
+    }
+
+    private func linkUtmMap(_ utm: OrttoSDKCore.LinkUtm) -> [String: Any] {
+        [
+            "utm_campaign": flutterValue(utm.campaign),
+            "utm_medium": flutterValue(utm.medium),
+            "utm_source": flutterValue(utm.source),
+            "utm_content": flutterValue(utm.content)
+        ]
+    }
+
+    private func flutterValue(_ value: String?) -> Any {
+        if let value = value {
+            return value
+        }
+        return NSNull()
     }
 
     private func requestPermissions(_ result: @escaping FlutterResult) {

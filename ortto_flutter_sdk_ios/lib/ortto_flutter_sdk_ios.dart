@@ -63,7 +63,7 @@ class OrttoFlutterSdkIOS extends OrttoFlutterSdkPlatformInterface {
   Future<LinkUtm> trackLinkClick(String link) {
     return methodChannel.invokeMethod("trackLinkClick", {
       'link': link,
-    }).then((value) => LinkUtm.fromMap(value.cast<String, String>()));
+    }).then((value) => LinkUtm.fromMap(value.cast<String, dynamic>()));
   }
 
   @override
