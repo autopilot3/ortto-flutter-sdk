@@ -1,3 +1,8 @@
+## 0.5.0
+* Standardize identity serialization keys across Dart, iOS, and Android.
+* Remove the unused `allowAnonUsers` configuration field.
+* Add method-channel contract and timeout test utilities.
+
 ## 0.4.0
 * Return Future<IdentityResult> for clearIdentity() and handle failures better for showWidget()
 

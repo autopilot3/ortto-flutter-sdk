@@ -1,4 +1,4 @@
-## Next
+## 0.5.0
 * Use Android SDK 1.8.8 and forward notification display control to the native handler.
 
 ## 0.4.9
