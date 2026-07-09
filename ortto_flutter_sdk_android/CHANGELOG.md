@@ -1,3 +1,6 @@
+## Next
+* Use Android SDK 1.8.8 and forward notification display control to the native handler.
+
 ## 0.4.9
 * Fix onMessageReceived not returning result to Dart, causing background push handlers to hang and block subsequent messages
 * Use non-deprecated OrttoConfig constructor (3-param instead of 4-param)

@@ -71,4 +71,35 @@ void main() {
 
     expect(harness.singleCall.method, 'processNextWidgetFromQueue');
   });
+
+  for (final displayNotification in <bool>[true, false]) {
+    test('onMessageReceived forwards display=$displayNotification', () async {
+      harness.respondWith(true);
+      final message = <String, dynamic>{
+        'data': <String, dynamic>{'ortto': 'payload'},
+      };
+
+      final handled = await platform.onMessageReceived(
+        message,
+        handleNotificationTrigger: displayNotification,
+      );
+
+      expect(handled, isTrue);
+      expect(harness.singleCall.method, 'onMessageReceived');
+      expect(harness.singleCall.arguments, <String, dynamic>{
+        'message': message,
+        'handleNotificationTrigger': displayNotification,
+      });
+    });
+  }
+
+  test('onMessageReceived preserves a non-Ortto handled=false result', () async {
+    harness.respondWith(false);
+
+    final handled = await platform.onMessageReceived(<String, dynamic>{
+      'data': <String, dynamic>{'unrelated': 'payload'},
+    });
+
+    expect(handled, isFalse);
+  });
 }

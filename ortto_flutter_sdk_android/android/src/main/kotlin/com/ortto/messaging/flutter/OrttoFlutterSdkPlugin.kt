@@ -241,6 +241,7 @@ class OrttoFlutterSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
 
     private fun onMessageReceived(call: MethodCall): Boolean {
         val message = call.argument<Map<String, Any>?>("message")
+        val handleNotificationTrigger = call.argument<Boolean>("handleNotificationTrigger") ?: true
         val context = applicationContext as Context
 
         // Inline transformation logic
@@ -273,7 +274,7 @@ class OrttoFlutterSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
 
         val handler = PushNotificationHandler(remoteMessage)
 
-        return handler.handleMessage(context)
+        return handler.handleMessage(context, handleNotificationTrigger)
     }
 
     private fun clearIdentity(result: MethodChannel.Result) {

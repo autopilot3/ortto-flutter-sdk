@@ -137,4 +137,15 @@ void main() {
       throwsA(isA<TimeoutException>()),
     );
   });
+
+  test('onMessageReceived preserves the iOS handled=false result', () async {
+    harness.respondWith(false);
+
+    final handled = await platform.onMessageReceived(<String, dynamic>{
+      'data': <String, dynamic>{'unrelated': 'payload'},
+    });
+
+    expect(handled, isFalse);
+    expect(harness.singleCall.method, 'onMessageReceived');
+  });
 }
