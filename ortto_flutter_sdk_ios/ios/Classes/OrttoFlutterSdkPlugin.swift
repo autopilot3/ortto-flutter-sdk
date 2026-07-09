@@ -15,11 +15,12 @@ public class OrttoFlutterSdkPlugin: NSObject, FlutterPlugin, UNUserNotificationC
 
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         switch call.method {
+        case "getPlatformName":
+            result("iOS")
         case "initialize":
             initialize(call, result)
         case "initializeCapture":
-            initializeCapture(call)
-            result(nil)
+            initializeCapture(call, result)
         case "identify":
             identify(call, result)
         case "clearData":
@@ -29,15 +30,13 @@ public class OrttoFlutterSdkPlugin: NSObject, FlutterPlugin, UNUserNotificationC
             dispatchPushRequest()
             result(nil)
         case "requestPermissions":
-            // TODO: implement requestPermissions
-            result(nil)
+            requestPermissions(result)
         case "registerDeviceToken":
-            registerDeviceToken(call)
+            registerDeviceToken(call, result)
         case "trackLinkClick":
             trackLinkClick(call, result)
         case "queueWidget":
-            queueWidget(call)
-            result(nil)
+            queueWidget(call, result)
         case "showWidget":
             showWidget(call, result)
         case "processNextWidgetFromQueue":
@@ -72,13 +71,27 @@ public class OrttoFlutterSdkPlugin: NSObject, FlutterPlugin, UNUserNotificationC
         result(nil)
     }
 
-    private func initializeCapture(_ call: FlutterMethodCall) {
-        if let configMap = call.arguments as? [String:Any?] {
-            try? OrttoCapture.initialize(
-                dataSourceKey: (configMap["dataSourceKey"] as? String)!,
-                captureJsURL: URL(string: configMap["captureJsUrl"] as? String ?? ""),
-                apiHost: URL(string: configMap["apiHost"] as? String ?? "")
-            );
+    private func initializeCapture(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
+        guard let configMap = call.arguments as? [String: Any?],
+              let dataSourceKey = configMap["dataSourceKey"] as? String,
+              !dataSourceKey.isEmpty else {
+            result(invalidArguments("initializeCapture requires a non-empty dataSourceKey"))
+            return
+        }
+
+        do {
+            try OrttoCapture.initialize(
+                dataSourceKey: dataSourceKey,
+                captureJsURL: url(from: configMap["captureJsUrl"]),
+                apiHost: url(from: configMap["apiHost"])
+            )
+            result(nil)
+        } catch {
+            result(FlutterError(
+                code: "CAPTURE_INITIALIZATION_ERROR",
+                message: error.localizedDescription,
+                details: String(describing: error)
+            ))
         }
     }
 
@@ -116,40 +129,49 @@ public class OrttoFlutterSdkPlugin: NSObject, FlutterPlugin, UNUserNotificationC
         }
     }
 
-    private func queueWidget(_ call: FlutterMethodCall) {
-        guard let args = call.arguments as? [String:Any?] else {
+    private func queueWidget(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
+        guard let args = call.arguments as? [String: Any?],
+              let widgetId = args["widgetId"] as? String,
+              !widgetId.isEmpty else {
+            result(invalidArguments("queueWidget requires a non-empty widgetId"))
             return
         }
 
-        if let widgetId = args["widgetId"] as? String {
-            OrttoCapture.shared.queueWidget(widgetId)
-        }
+        OrttoCapture.shared.queueWidget(widgetId)
+        result(nil)
     }
 
-    private func registerDeviceToken(_ call: FlutterMethodCall) {
-        guard let args = call.arguments as? [String:Any?] else {
+    private func registerDeviceToken(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
+        guard let args = call.arguments as? [String: Any?],
+              let token = args["token"] as? String,
+              !token.isEmpty else {
+            result(invalidArguments("registerDeviceToken requires a non-empty token"))
             return
         }
 
-        if let token = args["token"] as? String {
-            PushMessaging.shared.registerDeviceToken(fcmToken: token)
-        }
+        PushMessaging.shared.registerDeviceToken(fcmToken: token)
+        result(nil)
     }
 
     private func trackLinkClick(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
-        guard let args = call.arguments as? [String:Any?] else {
+        guard let args = call.arguments as? [String: Any?] else {
+            result(invalidArguments("trackLinkClick requires an argument map"))
             return
         }
 
-        guard let link = args["link"] as? String else {
+        guard let link = args["link"] as? String, !link.isEmpty else {
+            result(invalidArguments("trackLinkClick requires a non-empty link"))
             return
         }
 
         Ortto.shared.trackLinkClick(link) {}
 
-        guard let uri = URL(string: link) else { return }
-        guard let components = URLComponents(string: uri.absoluteString) else { return }
-        guard let queryItems = components.queryItems else { return }
+        guard let uri = URL(string: link),
+              let components = URLComponents(string: uri.absoluteString) else {
+            result(FlutterError(code: "INVALID_LINK", message: "The link is malformed", details: link))
+            return
+        }
+        let queryItems = components.queryItems ?? []
 
         var linkUtm: [String: String] = queryItems.reduce(into: [String: String]()) { (result, item) in
             switch item.name {
@@ -167,6 +189,38 @@ public class OrttoFlutterSdkPlugin: NSObject, FlutterPlugin, UNUserNotificationC
         }
 
         result(linkUtm)
+    }
+
+    private func requestPermissions(_ result: @escaping FlutterResult) {
+        UNUserNotificationCenter.current().getNotificationSettings { settings in
+            DispatchQueue.main.async {
+                switch settings.authorizationStatus {
+                case .notDetermined:
+                    result("ASK")
+                case .denied:
+                    result("PREVIOUSLY_DENIED")
+                case .authorized, .provisional, .ephemeral:
+                    result("PREVIOUSLY_GRANTED")
+                @unknown default:
+                    result(FlutterError(
+                        code: "UNKNOWN_PERMISSION_STATUS",
+                        message: "iOS returned an unknown notification authorization status",
+                        details: settings.authorizationStatus.rawValue
+                    ))
+                }
+            }
+        }
+    }
+
+    private func invalidArguments(_ message: String) -> FlutterError {
+        FlutterError(code: "INVALID_ARGUMENTS", message: message, details: nil)
+    }
+
+    private func url(from value: Any?) -> URL? {
+        guard let string = value as? String, !string.isEmpty else {
+            return nil
+        }
+        return URL(string: string)
     }
 
     private func onMessageReceived(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
