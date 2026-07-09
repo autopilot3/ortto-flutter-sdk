@@ -3,6 +3,9 @@ package com.ortto.messaging.flutter
 import android.app.Activity
 import android.app.Application
 import android.content.Context
+import android.net.Uri
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import java.lang.Exception
 import com.google.firebase.messaging.RemoteMessage
@@ -165,21 +168,57 @@ class OrttoFlutterSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     }
 
     private fun trackLinkClick(call: MethodCall, result: MethodChannel.Result) {
-        val link = call.argument<String>("link");
+        val link = call.argument<String>("link")
+        if (link.isNullOrBlank()) {
+            result.error("INVALID_ARGUMENTS", "trackLinkClick requires a non-empty link", null)
+            return
+        }
+
+        val uri = try {
+            Uri.parse(link)
+        } catch (error: RuntimeException) {
+            result.error("INVALID_LINK", "The link is malformed", error.message)
+            return
+        }
+
+        if (uri.scheme.isNullOrBlank()) {
+            result.error("INVALID_LINK", "The link is malformed", link)
+            return
+        }
+
+        val directUtm = LinkUtm.fromUri(uri)
+        if (uri.getQueryParameter("tracking_url") == null) {
+            result.success(linkUtmMap(directUtm))
+            return
+        }
+
+        val handler = Handler(Looper.getMainLooper())
+        var completed = false
+        val timeout = Runnable {
+            if (!completed) {
+                completed = true
+                result.error("TRACKING_ERROR", "Link tracking did not complete", link)
+            }
+        }
+        handler.postDelayed(timeout, 30_000)
 
         Ortto.instance().trackLinkClick(link) {
-            Log.d(tag, "trackLinkClick: $it")
-
-            val map = mapOf(
-                "utm_campaign" to it.campaign,
-                "utm_medium" to it.medium,
-                "utm_source" to it.source,
-                "utm_content" to it.content
-            )
-
-            result.success(map);
+            handler.post {
+                if (!completed) {
+                    completed = true
+                    handler.removeCallbacks(timeout)
+                    result.success(linkUtmMap(it))
+                }
+            }
         }
     }
+
+    private fun linkUtmMap(utm: LinkUtm): Map<String, String?> = mapOf(
+        "utm_campaign" to utm.campaign,
+        "utm_medium" to utm.medium,
+        "utm_source" to utm.source,
+        "utm_content" to utm.content
+    )
 
     private fun registerDeviceToken(call: MethodCall, result: MethodChannel.Result) {
         Ortto.instance().registerDeviceToken(call.argument<String>("token")) {

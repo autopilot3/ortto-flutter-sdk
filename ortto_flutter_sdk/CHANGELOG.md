@@ -3,6 +3,7 @@
 * **Breaking:** Remove the unused `allowAnonUsers` initialization argument. It was never forwarded to either native SDK; callers should omit it.
 * Rename `onbackgroundMessageReceived` to `onBackgroundMessageReceived`; the old spelling remains as a deprecated forwarding alias.
 * Prevent duplicate Android notifications by suppressing SDK display for background notification payloads while retaining display for data-only payloads.
+* Align iOS and Android link UTM results and return structured errors for malformed links and tracking timeouts.
 
 ## 0.6.3
 * Update ortto_flutter_sdk_android to 0.4.9
