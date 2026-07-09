@@ -86,6 +86,18 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 ```
 
 
+## iOS dependency management
+
+Flutter 3.44 and later can integrate the iOS plugin with Swift Package Manager. Enable Flutter's SPM support before building:
+
+```shell
+flutter config --enable-swift-package-manager
+flutter clean
+flutter pub get
+```
+
+The plugin resolves Ortto iOS SDK `1.10.x` or newer up to, but excluding, `2.0.0`. Projects that keep CocoaPods enabled continue to use the podspec fallback pinned to Ortto iOS SDK `1.9.1`.
+
 ## iOS Background Notifications
 
 1. Open the `ios/Runner.xcworkspace` workspace folder in Xcode
