@@ -17,6 +17,14 @@ class MethodChannelHarness {
     });
   }
 
+  void respond(Future<Object?> Function(MethodCall call) handler) {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(channel, (call) {
+      calls.add(call);
+      return handler(call);
+    });
+  }
+
   void uninstall() {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(channel, null);

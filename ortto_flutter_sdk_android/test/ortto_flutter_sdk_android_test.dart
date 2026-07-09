@@ -102,4 +102,36 @@ void main() {
 
     expect(handled, isFalse);
   });
+
+  test('trackLinkClick returns the shared LinkUtm shape', () async {
+    harness.respondWith(<String, dynamic>{
+      'utm_campaign': 'launch',
+      'utm_medium': 'push',
+      'utm_source': 'ortto',
+      'utm_content': null,
+    });
+
+    final utm = await platform.trackLinkClick(
+      'https://example.test?utm_campaign=launch',
+    );
+
+    expect(utm.campaign, 'launch');
+    expect(utm.medium, 'push');
+    expect(utm.source, 'ortto');
+    expect(utm.content, isNull);
+  });
+
+  test('trackLinkClick propagates malformed-link errors', () async {
+    harness.respond(
+      (_) async => throw PlatformException(
+        code: 'INVALID_LINK',
+        message: 'The link is malformed',
+      ),
+    );
+
+    await expectLater(
+      platform.trackLinkClick('not a URL'),
+      throwsA(isA<PlatformException>()),
+    );
+  });
 }

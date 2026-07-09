@@ -148,4 +148,80 @@ void main() {
     expect(handled, isFalse);
     expect(harness.singleCall.method, 'onMessageReceived');
   });
+
+  test('trackLinkClick returns the shared LinkUtm shape', () async {
+    harness.respondWith(<String, dynamic>{
+      'utm_campaign': 'launch',
+      'utm_medium': 'push',
+      'utm_source': 'ortto',
+      'utm_content': null,
+    });
+
+    final utm = await platform.trackLinkClick(
+      'https://example.test?utm_campaign=launch',
+    );
+
+    expect(utm.campaign, 'launch');
+    expect(utm.medium, 'push');
+    expect(utm.source, 'ortto');
+    expect(utm.content, isNull);
+  });
+
+  test('trackLinkClick accepts an encoded tracking link', () async {
+    harness.respondWith(<String, dynamic>{
+      'utm_campaign': 'launch',
+      'utm_medium': null,
+      'utm_source': null,
+      'utm_content': null,
+    });
+    const link =
+        'https://click.example.test?tracking_url=aHR0cHM6Ly9leGFtcGxlLnRlc3Q_dXRtX2NhbXBhaWduPWxhdW5jaA';
+
+    final utm = await platform.trackLinkClick(link);
+
+    expect(utm.campaign, 'launch');
+    expect(harness.singleCall.arguments, <String, dynamic>{'link': link});
+  });
+
+  test('trackLinkClick permits links with missing UTM values', () async {
+    harness.respondWith(<String, dynamic>{
+      'utm_campaign': null,
+      'utm_medium': null,
+      'utm_source': null,
+      'utm_content': null,
+    });
+
+    final utm = await platform.trackLinkClick('https://example.test/path');
+
+    expect(utm.campaign, isNull);
+    expect(utm.medium, isNull);
+  });
+
+  test('trackLinkClick propagates malformed-link errors', () async {
+    harness.respond(
+      (_) async => throw PlatformException(
+        code: 'INVALID_LINK',
+        message: 'The link is malformed',
+      ),
+    );
+
+    await expectLater(
+      platform.trackLinkClick('not a URL'),
+      throwsA(isA<PlatformException>()),
+    );
+  });
+
+  test('trackLinkClick propagates native tracking failures', () async {
+    harness.respond(
+      (_) async => throw PlatformException(
+        code: 'TRACKING_ERROR',
+        message: 'Link tracking did not complete',
+      ),
+    );
+
+    await expectLater(
+      platform.trackLinkClick('https://example.test/tracked'),
+      throwsA(isA<PlatformException>()),
+    );
+  });
 }
