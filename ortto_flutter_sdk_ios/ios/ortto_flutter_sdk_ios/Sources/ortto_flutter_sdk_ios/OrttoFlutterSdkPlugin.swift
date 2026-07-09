@@ -4,7 +4,6 @@ import OrttoSDKCore
 import OrttoPushMessagingFCM
 import OrttoInAppNotifications
 import OrttoPushMessaging
-import FirebaseMessaging
 
 public class OrttoFlutterSdkPlugin: NSObject, FlutterPlugin, UNUserNotificationCenterDelegate {
     public static func register(with registrar: FlutterPluginRegistrar) {
