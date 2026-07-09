@@ -44,3 +44,80 @@ jobs:
 
       - name: Test
         run: flutter test
+
+  ios-build:
+    name: iOS ${{ matrix.dependency-manager }}
+    runs-on: macos-15
+    strategy:
+      fail-fast: false
+      matrix:
+        dependency-manager: [spm, cocoapods]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 3.44.0
+          channel: stable
+          cache: true
+
+      - name: Select dependency manager
+        run: |
+          if [ "${{ matrix.dependency-manager }}" = "spm" ]; then
+            flutter config --enable-swift-package-manager
+          else
+            flutter config --no-enable-swift-package-manager
+          fi
+
+      - name: Create clean iOS host app
+        run: |
+          flutter create \
+            --platforms=ios \
+            --org=com.ortto \
+            --project-name=ortto_ci \
+            "$RUNNER_TEMP/ortto_ci"
+          flutter pub add \
+            --directory="$RUNNER_TEMP/ortto_ci" \
+            "ortto_flutter_sdk@{path: $GITHUB_WORKSPACE/ortto_flutter_sdk}"
+          flutter pub add \
+            --directory="$RUNNER_TEMP/ortto_ci" \
+            "override:ortto_flutter_sdk_android@{path: $GITHUB_WORKSPACE/ortto_flutter_sdk_android}" \
+            "override:ortto_flutter_sdk_ios@{path: $GITHUB_WORKSPACE/ortto_flutter_sdk_ios}" \
+            "override:ortto_flutter_sdk_platform_interface@{path: $GITHUB_WORKSPACE/ortto_flutter_sdk_platform_interface}"
+          sed -i '' \
+            's/IPHONEOS_DEPLOYMENT_TARGET = 13.0/IPHONEOS_DEPLOYMENT_TARGET = 15.0/g' \
+            "$RUNNER_TEMP/ortto_ci/ios/Runner.xcodeproj/project.pbxproj"
+          sed -i '' \
+            "s/platform :ios, '13.0'/platform :ios, '15.0'/" \
+            "$RUNNER_TEMP/ortto_ci/ios/Podfile"
+
+      - name: Build iOS simulator app
+        working-directory: ${{ runner.temp }}/ortto_ci
+        run: flutter build ios --simulator --debug
+
+      - name: Verify Firebase Apple SDK 12
+        working-directory: ${{ runner.temp }}/ortto_ci
+        run: |
+          if [ "${{ matrix.dependency-manager }}" = "spm" ]; then
+            resolved=$(find ios -name Package.resolved | head -1)
+            ruby -rjson -e '
+              pins = JSON.parse(File.read(ARGV.fetch(0))).fetch("pins")
+              versions = pins
+                .select { |pin| pin["identity"] == "firebase-ios-sdk" }
+                .map { |pin| pin.fetch("state").fetch("version") }
+                .uniq
+              abort "Expected one Firebase Apple 12.x version, got #{versions}" unless
+                versions.length == 1 && versions.first.start_with?("12.")
+              puts "Firebase Apple SDK #{versions.first}"
+            ' "$resolved"
+          else
+            versions=$(grep -E '^  - Firebase[^ ]* \([0-9]+\.[0-9]+\.[0-9]+\)' ios/Podfile.lock \
+              | sed -E 's/.*\(([0-9]+\.[0-9]+\.[0-9]+).*/\1/' \
+              | sort -u)
+            if [ "$(printf '%s\n' "$versions" | sed '/^$/d' | wc -l | tr -d ' ')" != "1" ] \
+              || [[ "$versions" != 12.* ]]; then
+              echo "Expected one Firebase Apple 12.x version, got: $versions"
+              exit 1
+            fi
+            echo "Firebase Apple SDK $versions"
+          fi

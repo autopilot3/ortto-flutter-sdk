@@ -1,0 +1,9 @@
+dependency_overrides:
+  ortto_flutter_sdk:
+    path: ../ortto_flutter_sdk
+  ortto_flutter_sdk_android:
+    path: ../ortto_flutter_sdk_android
+  ortto_flutter_sdk_ios:
+    path: ../ortto_flutter_sdk_ios
+  ortto_flutter_sdk_platform_interface:
+    path: ../ortto_flutter_sdk_platform_interface

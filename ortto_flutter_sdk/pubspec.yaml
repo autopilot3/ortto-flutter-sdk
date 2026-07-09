@@ -17,8 +17,8 @@ flutter:
         default_package: ortto_flutter_sdk_ios
 
 dependencies:
-  firebase_core: ^3.15.2
-  firebase_messaging: ^15.2.10
+  firebase_core: ^4.0.0
+  firebase_messaging: ^16.0.0
   flutter:
     sdk: flutter
   ortto_flutter_sdk_android: ^0.4.9

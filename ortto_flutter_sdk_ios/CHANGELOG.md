@@ -1,3 +1,7 @@
+## Next
+* Add Swift Package Manager support with Ortto iOS `>=1.10.0 <2.0.0`.
+* Pin the CocoaPods fallback to Ortto iOS 1.9.1 and Firebase Apple 12.
+
 ## 0.6.2
 * Update Ortto iOS SDK to v1.8.4
 
