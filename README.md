@@ -99,13 +99,13 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
    1. In the application menu bar select File -> New -> Target
    2. Select Notification Service Extension
    3. Click Next
-   4. Name the extension `NotificationService`
+   4. Name the extension `NotificationServiceExtension`
    5. Click Finish
 4. In the `ios/Podfile` add the following
 ```ruby
-target 'NotificationExtension' do
+target 'NotificationServiceExtension' do
   use_frameworks!
-  pod 'OrttoPushMessagingFCM', '~> 1.5'
+  pod 'OrttoPushMessagingFCM', '1.8.4'
 end 
 ```
 5. Run `pod install --repo-update --project-directory=ios` in root project folder
@@ -118,19 +118,19 @@ import OrttoPushMessagingFCM
 
 class NotificationService: UNNotificationServiceExtension {
 
-    var contentHandler: ((UNNotificationContent) -> Void)?
-    var bestAttemptContent: UNMutableNotificationContent?
+    private var handledByOrtto = false
 
     override func didReceive(_ request: UNNotificationRequest, withContentHandler contentHandler: @escaping (UNNotificationContent) -> Void) {
-        self.contentHandler = contentHandler
+        handledByOrtto = PushMessaging.shared.didReceive(request, withContentHandler: contentHandler)
 
-        let handled = PushMessaging.shared.didReceive(request, withContentHandler: contentHandler)        
+        if !handledByOrtto {
+            contentHandler(request.content)
+        }
     }
-    
+
     override func serviceExtensionTimeWillExpire() {
-    
-        if let contentHandler = contentHandler, let bestAttemptContent =  bestAttemptContent {
-            contentHandler(bestAttemptContent)
+        if handledByOrtto {
+            PushMessaging.shared.serviceExtensionTimeWillExpire()
         }
     }
 }
