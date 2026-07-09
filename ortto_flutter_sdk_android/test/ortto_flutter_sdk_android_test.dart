@@ -63,4 +63,12 @@ void main() {
       'phone': '+61000000000',
     });
   });
+
+  test('processNextWidgetFromQueue uses the native method name', () async {
+    harness.respondWith(null);
+
+    await platform.processNextWidgetFromQueue();
+
+    expect(harness.singleCall.method, 'processNextWidgetFromQueue');
+  });
 }
