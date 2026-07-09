@@ -15,6 +15,20 @@
 4. Add Firebase messaging dependency `flutter pub add firebase_messaging`
 5. Ensure `lib/firebase_options.dart` config file is present and configured correctly
 
+## Development
+
+Run every federated package test suite from the repository root:
+
+```shell
+./tool/test_all.sh
+```
+
+Additional `flutter test` arguments are forwarded to every package, for example:
+
+```shell
+./tool/test_all.sh --coverage
+```
+
 ## Usage
 
 1. In the root of your project, run: `flutter pub add ortto_flutter_sdk`
