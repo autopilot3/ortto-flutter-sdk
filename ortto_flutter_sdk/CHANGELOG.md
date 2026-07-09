@@ -1,4 +1,4 @@
-## Next
+## 0.7.0
 
 * **Breaking:** Remove the unused `allowAnonUsers` initialization argument. It was never forwarded to either native SDK; callers should omit it.
 * Rename `onbackgroundMessageReceived` to `onBackgroundMessageReceived`; the old spelling remains as a deprecated forwarding alias.
