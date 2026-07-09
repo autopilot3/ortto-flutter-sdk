@@ -20,7 +20,7 @@ import UserNotifications
         Messaging.messaging().delegate = self
 
         // Set the iOS push notification click handler
-        // This is required in order for the Customer.io SDK to handle when a push is clicked.
+        // This is required in order for the Ortto SDK to handle when a push is clicked.
         UNUserNotificationCenter.current().delegate = self
 
         // Tells iOS to provide a push token, if one is available.
@@ -31,12 +31,13 @@ import UserNotifications
     }
     
     
-        func application(application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
-            
-            // push this ?
-            
-             Messaging.messaging().setAPNSToken(deviceToken, type: .unknown);
-         }
+        override func application(
+            _ application: UIApplication,
+            didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data
+        ) {
+            super.application(application, didRegisterForRemoteNotificationsWithDeviceToken: deviceToken)
+            Messaging.messaging().setAPNSToken(deviceToken, type: .unknown)
+        }
     
          // Called when a push notification is clicked.
          override func userNotificationCenter(
