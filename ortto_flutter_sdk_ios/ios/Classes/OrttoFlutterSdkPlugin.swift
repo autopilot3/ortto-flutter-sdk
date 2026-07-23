@@ -30,10 +30,10 @@ public class OrttoFlutterSdkPlugin: NSObject, FlutterPlugin, UNUserNotificationC
             dispatchPushRequest()
             result(nil)
         case "requestPermissions":
-            // TODO: implement requestPermissions
-            result(nil)
+            requestPermissions(result)
         case "registerDeviceToken":
             registerDeviceToken(call)
+            result(nil)
         case "trackLinkClick":
             trackLinkClick(call, result)
         case "queueWidget":
@@ -74,7 +74,7 @@ public class OrttoFlutterSdkPlugin: NSObject, FlutterPlugin, UNUserNotificationC
 
     private func identify(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
         if let userData = call.arguments as? [String:Any?] {
-            var user = UserIdentifier(contactID: userData["contact_id"] as? String, email: userData["email"] as? String, phone: userData["phone"] as? String, externalID: userData["external_id"] as? String, firstName: userData["first_name"] as? String, lastName: userData["last_name"] as? String)
+            var user = UserIdentifier(contactID: userData["contact_id"] as? String, email: userData["email"] as? String, phone: userData["phone_number"] as? String, externalID: userData["external_id"] as? String, firstName: userData["first_name"] as? String, lastName: userData["last_name"] as? String)
             user.acceptsGDPR = userData["accepts_gdpr"] as? Bool ?? false;
 
             Ortto.shared.identify(user) { response in
@@ -138,6 +138,32 @@ public class OrttoFlutterSdkPlugin: NSObject, FlutterPlugin, UNUserNotificationC
 
     private func onMessageReceived(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
         result(true)
+    }
+
+    private func requestPermissions(_ result: @escaping FlutterResult) {
+        let center = UNUserNotificationCenter.current()
+        center.getNotificationSettings { settings in
+            switch settings.authorizationStatus {
+            case .notDetermined:
+                center.requestAuthorization(options: [.alert, .badge, .sound]) { granted, _ in
+                    DispatchQueue.main.async {
+                        if granted {
+                            UIApplication.shared.registerForRemoteNotifications()
+                        }
+                        result(granted ? "GRANTED" : "DISABLED")
+                    }
+                }
+            case .denied:
+                DispatchQueue.main.async { result("PREVIOUSLY_DENIED") }
+            case .authorized, .provisional, .ephemeral:
+                DispatchQueue.main.async {
+                    UIApplication.shared.registerForRemoteNotifications()
+                    result("PREVIOUSLY_GRANTED")
+                }
+            @unknown default:
+                DispatchQueue.main.async { result("DISABLED") }
+            }
+        }
     }
 
     private func processNextWidgetFromQueue() {

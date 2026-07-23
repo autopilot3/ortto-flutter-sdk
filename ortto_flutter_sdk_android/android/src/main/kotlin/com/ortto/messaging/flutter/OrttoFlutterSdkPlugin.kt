@@ -111,13 +111,13 @@ class OrttoFlutterSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
 
     private fun identify(call: MethodCall, result: MethodChannel.Result): Unit? {
         val user = UserID.make();
-        user.firstName = call.argument("firstName");
-        user.lastName = call.argument("lastName");
+        user.firstName = call.argument("first_name");
+        user.lastName = call.argument("last_name");
         user.email = call.argument("email");
-        user.acceptsGdpr = call.argument<Boolean>("acceptsGdpr") ?: false;
-        user.contactId = call.argument("contactId");
-        user.phone = call.argument("phone");
-        user.externalId = call.argument("externalId");
+        user.acceptsGdpr = call.argument<Boolean>("accepts_gdpr") ?: false;
+        user.contactId = call.argument("contact_id");
+        user.phone = call.argument("phone_number");
+        user.externalId = call.argument("external_id");
 
         Ortto.instance().identify(user, object : Ortto.OnIdentifyListener {
             override fun onComplete() {

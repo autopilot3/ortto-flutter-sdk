@@ -1,3 +1,8 @@
+## 0.6.3
+* Implement requestPermissions (previously returned nil and threw on the Dart side)
+* Fix registerDeviceToken never completing its Future
+* Fix identify dropping the phone number (read phone_number, matching the Dart layer)
+
 ## 0.6.2
 * Update Ortto iOS SDK to v1.8.4
 
