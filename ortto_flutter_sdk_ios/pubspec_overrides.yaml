@@ -1,0 +1,4 @@
+# Local development overrides — see note in ortto_flutter_sdk/pubspec_overrides.yaml
+dependency_overrides:
+  ortto_flutter_sdk_platform_interface:
+    path: ../ortto_flutter_sdk_platform_interface
