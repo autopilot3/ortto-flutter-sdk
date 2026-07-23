@@ -109,15 +109,25 @@ class OrttoFlutterSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         return null;
     }
 
+    companion object {
+        // Keys must match UserID.toMap() in ortto_flutter_sdk_platform_interface.
+        @JvmStatic
+        fun userFromArguments(args: Map<String, Any?>): UserID {
+            val user = UserID.make()
+            user.firstName = args["first_name"] as? String
+            user.lastName = args["last_name"] as? String
+            user.email = args["email"] as? String
+            user.acceptsGdpr = args["accepts_gdpr"] as? Boolean ?: false
+            user.contactId = args["contact_id"] as? String
+            user.phone = args["phone_number"] as? String
+            user.externalId = args["external_id"] as? String
+            return user
+        }
+    }
+
     private fun identify(call: MethodCall, result: MethodChannel.Result): Unit? {
-        val user = UserID.make();
-        user.firstName = call.argument("first_name");
-        user.lastName = call.argument("last_name");
-        user.email = call.argument("email");
-        user.acceptsGdpr = call.argument<Boolean>("accepts_gdpr") ?: false;
-        user.contactId = call.argument("contact_id");
-        user.phone = call.argument("phone_number");
-        user.externalId = call.argument("external_id");
+        @Suppress("UNCHECKED_CAST")
+        val user = userFromArguments(call.arguments as? Map<String, Any?> ?: emptyMap());
 
         Ortto.instance().identify(user, object : Ortto.OnIdentifyListener {
             override fun onComplete() {
