@@ -1,0 +1,23 @@
+# Buildkite CI — flutter analyze for every package. Tests come back with #23.
+# The step script downloads a pinned Flutter into the agent cache when the
+# agent has none, so no preinstalled Flutter is needed.
+
+steps:
+  - label: ":mag: agent environment"
+    timeout_in_minutes: 5
+    commands:
+      - uname -a
+      - sw_vers 2>/dev/null || cat /etc/os-release 2>/dev/null || true
+      - echo "user=$(whoami) home=$HOME"
+      - echo "PATH=$PATH"
+      - for t in git curl unzip xz tar flutter dart; do printf '%-8s' "$t"; command -v $t || echo MISSING; done
+      - df -h "$HOME" | tail -1
+
+  - label: ":dart: {{matrix}} — analyze"
+    matrix:
+      - "ortto_flutter_sdk_platform_interface"
+      - "ortto_flutter_sdk_ios"
+      - "ortto_flutter_sdk_android"
+      - "ortto_flutter_sdk"
+    timeout_in_minutes: 20
+    command: ".buildkite/steps/test-package.sh {{matrix}}"
