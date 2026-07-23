@@ -19,7 +19,7 @@ pluginManagement {
 plugins {
 
     id "dev.flutter.flutter-plugin-loader" version "1.0.0"
-    id "com.android.application" version "8.2.2" apply false
+    id "com.android.application" version "8.7.3" apply false
     // START: FlutterFire Configuration
     id "com.google.gms.google-services" version "4.3.15" apply false
     // END: FlutterFire Configuration
@@ -27,3 +27,17 @@ plugins {
 }
 
 include ":app"
+
+// Develop against a local checkout of the native Android SDK by exporting
+// ORTTO_ANDROID_SDK_PATH (absolute path) before running gradle / flutter run:
+//   export ORTTO_ANDROID_SDK_PATH=$HOME/ortto/ortto-push-android-sdk
+// Gradle then substitutes com.ortto:androidsdk with that checkout's
+// :messaging module instead of the Maven Central artifact.
+def orttoAndroidSdkPath = System.getenv("ORTTO_ANDROID_SDK_PATH")
+if (orttoAndroidSdkPath != null && !orttoAndroidSdkPath.isEmpty()) {
+    includeBuild(orttoAndroidSdkPath) {
+        dependencySubstitution {
+            substitute module("com.ortto:androidsdk") using project(":messaging")
+        }
+    }
+}
