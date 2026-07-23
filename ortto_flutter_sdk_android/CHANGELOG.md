@@ -1,3 +1,7 @@
+## 0.4.10
+* Fix identify dropping every field except email: read the snake_case keys the Dart layer sends (first_name, last_name, accepts_gdpr, contact_id, phone_number, external_id)
+* Fix processNextWidgetFromQueue using the wrong channel method name
+
 ## 0.4.9
 * Fix onMessageReceived not returning result to Dart, causing background push handlers to hang and block subsequent messages
 * Use non-deprecated OrttoConfig constructor (3-param instead of 4-param)

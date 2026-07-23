@@ -82,7 +82,7 @@ class FlutterOrttoPushSdkAndroid extends OrttoFlutterSdkPlatformInterface {
 
   @override
   Future<void> processNextWidgetFromQueue() {
-    return methodChannel.invokeMethod('processNextWidgetInQueue');
+    return methodChannel.invokeMethod('processNextWidgetFromQueue');
   }
 
   @override

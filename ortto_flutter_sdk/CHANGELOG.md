@@ -1,3 +1,7 @@
+## 0.6.4
+* Update ortto_flutter_sdk_android to 0.4.10 (identify field fix, widget queue fix)
+* Update ortto_flutter_sdk_ios to 0.6.3 (requestPermissions, registerDeviceToken, identify phone fix)
+
 ## 0.6.3
 * Update ortto_flutter_sdk_android to 0.4.9
 * Fix background push notifications failing after the first message on Android
