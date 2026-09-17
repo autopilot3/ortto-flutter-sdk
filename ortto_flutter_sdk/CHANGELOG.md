@@ -4,7 +4,8 @@
 * Rename `onbackgroundMessageReceived` to `onBackgroundMessageReceived`; the old spelling remains as a deprecated forwarding alias.
 * Prevent duplicate Android notifications by suppressing SDK display for background notification payloads while retaining display for data-only payloads.
 * Align iOS and Android link UTM results and return structured errors for malformed links and tracking timeouts.
-* Add Flutter 3.44 Swift Package Manager support, Firebase 12 compatibility, and a CocoaPods fallback on Ortto iOS 1.9.1.
+* Add Flutter 3.44 Swift Package Manager support and Firebase 12 compatibility.
+* Use final CocoaPods-compatible Ortto iOS SDK 1.10.1, Ortto iOS SDK `>=1.10.1 <2.0.0` through Swift Package Manager, and Ortto Android SDK 1.8.9.
 
 ## 0.6.3
 * Update ortto_flutter_sdk_android to 0.4.9

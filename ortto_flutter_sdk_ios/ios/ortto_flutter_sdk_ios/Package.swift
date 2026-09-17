@@ -17,7 +17,7 @@ let package = Package(
         .package(name: "FlutterFramework", path: "../FlutterFramework"),
         .package(
             url: "https://github.com/autopilot3/ortto-push-ios-sdk.git",
-            "1.10.0"..<"2.0.0"
+            "1.10.1"..<"2.0.0"
         )
     ],
     targets: [

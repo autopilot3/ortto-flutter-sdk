@@ -39,4 +39,8 @@ flutter clean
 flutter pub get
 ```
 
-SPM resolves Ortto iOS SDK `>=1.10.0 <2.0.0`. CocoaPods remains available as a fallback and is pinned to Ortto iOS SDK 1.9.1.
+SPM resolves Ortto iOS SDK `>=1.10.1 <2.0.0`. CocoaPods remains available as a fallback and is pinned to the final CocoaPods-compatible Ortto iOS SDK 1.10.1. Future Ortto iOS SDK releases are distributed through Swift Package Manager.
+
+## Android native SDK
+
+Version 0.7.0 resolves Ortto Android SDK 1.8.9, requires Android API 26 or later, and replaces the retired `firebase-messaging-ktx` artifact with the main Firebase Messaging module.

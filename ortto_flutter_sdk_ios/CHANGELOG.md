@@ -1,7 +1,7 @@
 ## 0.7.0
 * Fix identity serialization, native error propagation, permissions, token completion, platform naming, and link tracking.
-* Add Swift Package Manager support with Ortto iOS `>=1.10.0 <2.0.0`.
-* Pin the CocoaPods fallback to Ortto iOS 1.9.1 and Firebase Apple 12.
+* Add Swift Package Manager support with Ortto iOS `>=1.10.1 <2.0.0`.
+* Pin the final CocoaPods fallback to Ortto iOS 1.10.1 and Firebase Apple 12.
 
 ## 0.6.2
 * Update Ortto iOS SDK to v1.8.4

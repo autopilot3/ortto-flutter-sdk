@@ -110,7 +110,7 @@ flutter clean
 flutter pub get
 ```
 
-The plugin resolves Ortto iOS SDK `1.10.x` or newer up to, but excluding, `2.0.0`. Projects that keep CocoaPods enabled continue to use the podspec fallback pinned to Ortto iOS SDK `1.9.1`.
+The plugin resolves Ortto iOS SDK `1.10.1` or newer up to, but excluding, `2.0.0`. Projects that keep CocoaPods enabled use the final podspec fallback pinned to Ortto iOS SDK `1.10.1`; later native iOS releases are Swift Package Manager only.
 
 ## iOS Background Notifications
 
@@ -131,7 +131,7 @@ The plugin resolves Ortto iOS SDK `1.10.x` or newer up to, but excluding, `2.0.0
 ```ruby
 target 'NotificationServiceExtension' do
   use_frameworks!
-  pod 'OrttoPushMessagingFCM', '1.8.4'
+  pod 'OrttoPushMessagingFCM', '1.10.1'
 end 
 ```
 5. Run `pod install --repo-update --project-directory=ios` in root project folder

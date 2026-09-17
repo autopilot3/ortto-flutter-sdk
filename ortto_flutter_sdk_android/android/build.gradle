@@ -1,12 +1,12 @@
 buildscript {
-    ext.kotlin_version = '1.7.10'
+    ext.kotlin_version = '2.3.21'
     repositories {
         google()
         mavenCentral()
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:7.2.2'
+        classpath 'com.android.tools.build:gradle:8.13.2'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
 }
@@ -17,27 +17,17 @@ apply plugin: 'kotlin-android'
 group 'com.ortto.androidsdk'
 version '1.0-SNAPSHOT'
 
-buildscript {
-    repositories {
-        google()
-        mavenCentral()
-    }
-    dependencies {
-        classpath 'com.android.tools.build:gradle:8.3.0'
-    }
-}
-
 android {
-    compileSdkVersion 34
+    compileSdkVersion 36
     namespace 'com.ortto.messaging.flutter'
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
 
     kotlinOptions {
-        jvmTarget = '1.8'
+        jvmTarget = '17'
     }
 
     sourceSets {
@@ -45,13 +35,12 @@ android {
     }
 
     defaultConfig {
-        minSdkVersion 19
+        minSdkVersion 26
     }
 }
 
 dependencies {
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-    implementation "com.ortto:androidsdk:1.8.8"
-//    implementation project(':ortto-android-sdk')
-    implementation 'com.google.firebase:firebase-messaging-ktx:23.3.1'
+    implementation "com.ortto:androidsdk:1.8.9"
+    implementation platform('com.google.firebase:firebase-bom:34.19.0')
+    implementation 'com.google.firebase:firebase-messaging'
 }

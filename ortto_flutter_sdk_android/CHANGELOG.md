@@ -1,5 +1,7 @@
 ## 0.5.0
-* Use Android SDK 1.8.8 and forward notification display control to the native handler.
+* Use Android SDK 1.8.9 and forward notification display control to the native handler.
+* Replace the retired Firebase Messaging KTX artifact with the main Firebase Messaging module on BOM 34.19.0.
+* Align the Android build with API 36, Java 17, and the native SDK's minimum API 26.
 
 ## 0.4.9
 * Fix onMessageReceived not returning result to Dart, causing background push handlers to hang and block subsequent messages
