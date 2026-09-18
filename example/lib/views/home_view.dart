@@ -106,9 +106,9 @@ class HomeView extends StatelessWidget {
           )
         else ...[
           LabeledRow('Token', value: model.pushTokenPlaceholder),
-          // Ortto SDK: push registration — permission prompt via
-          // Ortto.instance.requestPermissions, then the Firebase token is
-          // forwarded to Ortto.instance.registerDeviceToken.
+          // Ortto SDK: push registration — Firebase owns Apple's permission
+          // prompt, then the token is forwarded to
+          // Ortto.instance.registerDeviceToken.
           InkWell(
             onTap: model.homePushActionDisabled
                 ? null

@@ -59,6 +59,19 @@ void main() async {
   final prefs = await SharedPreferences.getInstance();
   final model = PushModel(prefs);
 
+  // Firebase does not present notification payloads while an iOS app is in
+  // the foreground unless the application opts in. Keep Android delivery
+  // owned by the native Ortto FirebaseMessagingService to avoid duplicates.
+  if (!kIsWeb && defaultTargetPlatform == TargetPlatform.iOS) {
+    await FirebaseMessaging.instance
+        .setForegroundNotificationPresentationOptions(
+      alert: true,
+      badge: true,
+      sound: true,
+    );
+    FirebaseMessaging.onMessage.listen(model.handleForegroundMessage);
+  }
+
   // Ortto SDK: initialize push and (when configured) in-app notifications.
   if (AppConfig.canInitializeSDK) {
     try {

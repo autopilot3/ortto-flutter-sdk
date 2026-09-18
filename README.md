@@ -46,6 +46,9 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
+  // The handler must be a top-level function and registered before runApp.
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+
   await Ortto.instance.init(
     appKey: '<APP_KEY>',
     endpoint: '<APP_ENDPOINT>',
@@ -65,9 +68,33 @@ void main() async {
 
   await Ortto.instance.identify(user);
 
+  // On iOS, macOS, web, and Android 13+, Firebase Messaging owns the
+  // notification permission request. On iOS this displays the system modal.
+  final settings = await FirebaseMessaging.instance.requestPermission(
+    alert: true,
+    badge: true,
+    sound: true,
+  );
+
+  if (settings.authorizationStatus == AuthorizationStatus.authorized ||
+      settings.authorizationStatus == AuthorizationStatus.provisional) {
+    final token = await FirebaseMessaging.instance.getToken();
+    if (token != null) {
+      await Ortto.instance.registerDeviceToken(token);
+    }
+  }
+
+  FirebaseMessaging.instance.onTokenRefresh.listen(
+    Ortto.instance.registerDeviceToken,
+  );
+
   await Ortto.instance.dispatchPushRequest();
 
-  FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(badge: true, alert: true, sound: true);
+  await FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
+    badge: true,
+    alert: true,
+    sound: true,
+  );
 
   // Android delivery is owned by the native Ortto FirebaseMessagingService.
   // Forward Firebase callbacks only on iOS to avoid duplicate Android
@@ -78,7 +105,13 @@ void main() async {
     });
   }
 
-  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+  FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+    // Route message.data after a tap while the app was in the background.
+  });
+  final initialMessage = await FirebaseMessaging.instance.getInitialMessage();
+  if (initialMessage != null) {
+    // Route initialMessage.data after a tap that cold-started the app.
+  }
 
   runApp(const MyApp());
 }
@@ -91,11 +124,7 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  Ortto.instance
-    .onBackgroundMessageReceived(message.toMap())
-    .then((handled) {
-      return handled;
-    });
+  await Ortto.instance.onBackgroundMessageReceived(message.toMap());
 }
 
 ```

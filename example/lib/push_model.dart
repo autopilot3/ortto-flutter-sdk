@@ -174,7 +174,7 @@ class PushModel extends ChangeNotifier {
     if (isOrttoConfigurationMissing) return orttoConfigurationMissingLabel;
     if (isGeneratedFCMToken(fcmToken)) return 'Generated FCM token blocked';
     if (sdkToken != null && sdkToken == fcmToken.trim()) {
-      return 'FCM token registered';
+      return 'FCM token forwarded to Ortto SDK';
     }
     if (fcmToken.trim().isNotEmpty) return 'Ready to submit pasted FCM token';
     return 'Ready to request Firebase registration token';
@@ -410,8 +410,26 @@ class PushModel extends ChangeNotifier {
     _sessionSnapshotKeys.add(key);
     appendLog(
       'session snapshot: ${sessionId ?? "anonymous"} / '
-      '${sdkToken ?? "no-token"} / $permissionStatus',
+      '${sdkToken == null ? "no-token" : short(sdkToken)} / '
+      '$permissionStatus',
     );
+  }
+
+  /// Forwards foreground iOS delivery through Ortto and leaves a sanitized
+  /// observable breadcrumb for the physical-device test matrix.
+  Future<void> handleForegroundMessage(RemoteMessage message) async {
+    final messageLabel = message.messageId?.trim().isNotEmpty == true
+        ? short(message.messageId)
+        : 'no-message-id';
+    appendLog('foreground FCM message received: $messageLabel');
+    try {
+      final handled =
+          await Ortto.instance.onBackgroundMessageReceived(message.toMap());
+      appendSdkLog('foreground message forwarded to Ortto: handled=$handled');
+    } catch (error) {
+      appendSdkLog('foreground message forwarding failed: $error',
+          level: LogLevel.error);
+    }
   }
 
   // MARK: - Deep links (notification tap routing)
@@ -702,7 +720,7 @@ class PushModel extends ChangeNotifier {
     if (failureReason == null) {
       final message = sdkToken == null
           ? 'FCM registration requested; waiting for Firebase callback'
-          : 'FCM token registered with Ortto SDK';
+          : 'FCM token forwarded to Ortto SDK';
       report(
         SDKActionID.registerPush,
         SDKActionTone.success,
@@ -783,14 +801,6 @@ class PushModel extends ChangeNotifier {
       return false;
     }
 
-    if (sdkToken == token) {
-      appendLog(
-        'FCM token registration de-duped; same token is already registered',
-        dedupeKey: 'fcm:dedupe:$token',
-      );
-      return true;
-    }
-
     appendLog(
         'calling Ortto.instance.registerDeviceToken with ${short(token)}');
     try {
@@ -804,7 +814,7 @@ class PushModel extends ChangeNotifier {
       appendSdkLog('Ortto.instance.registerDeviceToken completed');
       setActionStatus(
         SDKActionID.registerPush,
-        'FCM token registered with Ortto SDK',
+        'FCM token forwarded to Ortto SDK',
         SDKActionTone.success,
       );
       recordSessionSnapshot();
@@ -834,7 +844,23 @@ class PushModel extends ChangeNotifier {
     isRequestingPush = true;
     notifyListeners();
     appendLog('requesting push permission: $source');
-    if (isOrttoConfigurationMissing) {
+    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.iOS) {
+      try {
+        // On Apple platforms Firebase owns the OS authorization prompt. The
+        // Ortto iOS bridge reports the current state but does not show it.
+        final settings = await FirebaseMessaging.instance.requestPermission(
+          alert: true,
+          badge: true,
+          sound: true,
+        );
+        appendLog(
+          'FirebaseMessaging.requestPermission result: '
+          '${settings.authorizationStatus.name}',
+        );
+      } catch (error) {
+        appendLog('Firebase permission error: $error');
+      }
+    } else if (isOrttoConfigurationMissing) {
       appendLog('Ortto.requestPermissions skipped: SDK not configured; '
           'requesting via Firebase Messaging only');
       try {
