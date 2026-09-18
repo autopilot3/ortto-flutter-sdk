@@ -1,52 +1,116 @@
-name: Deploy SDK
+name: Publish packages
 
 on:
-  push:
-    tags:
-      - 'v[0-9]+.[0-9]+.[0-9]+*'
+  workflow_dispatch:
+    inputs:
+      source-ref:
+        description: Git ref containing the versions to publish
+        required: true
+        default: main
+        type: string
+      platform-interface:
+        description: Publish ortto_flutter_sdk_platform_interface
+        required: true
+        default: false
+        type: boolean
+      ios:
+        description: Publish ortto_flutter_sdk_ios
+        required: true
+        default: false
+        type: boolean
+      android:
+        description: Publish ortto_flutter_sdk_android
+        required: true
+        default: false
+        type: boolean
+      sdk:
+        description: Publish ortto_flutter_sdk
+        required: true
+        default: false
+        type: boolean
+      dry-run-only:
+        description: Validate selected packages without publishing
+        required: true
+        default: true
+        type: boolean
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  deploy-to-pub-dev:
+  publish:
+    name: Validate and publish selected packages
     runs-on: ubuntu-latest
     permissions:
-      id-token: write # Required for authentication using OIDC
+      contents: read
+      id-token: write
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ inputs.ref }}
+      - name: Require at least one package
+        env:
+          PLATFORM_INTERFACE: ${{ inputs.platform-interface }}
+          IOS: ${{ inputs.ios }}
+          ANDROID: ${{ inputs.android }}
+          SDK: ${{ inputs.sdk }}
+        run: |
+          if [[ "$PLATFORM_INTERFACE" != "true" && "$IOS" != "true" && "$ANDROID" != "true" && "$SDK" != "true" ]]; then
+            echo "Select at least one package to validate or publish." >&2
+            exit 1
+          fi
 
-      - name: Setup Dart
-        uses: dart-lang/setup-dart@v1
+      - uses: actions/checkout@v4
         with:
-          sdk: 3.4.4
+          ref: ${{ inputs.source-ref }}
 
-      - name: Setup Flutter SDK
-        uses: flutter-actions/setup-flutter@v3
+      - uses: subosito/flutter-action@v2
         with:
-          version: latest
+          flutter-version: 3.44.0
           channel: stable
+          cache: true
 
-      - name: Deploy platform_interface
+      - name: Validate platform interface
+        if: inputs.platform-interface
+        working-directory: ortto_flutter_sdk_platform_interface
         run: |
-          cd ortto_flutter_sdk_platform_interface
           flutter pub get
-          flutter pub publish -f || true
+          dart pub publish --dry-run
 
-      - name: Deploy sdk_ios
-        run: | 
-          cd ortto_flutter_sdk_ios 
-          dart pub publish -f || true
+      - name: Publish platform interface
+        if: inputs.platform-interface && !inputs.dry-run-only
+        working-directory: ortto_flutter_sdk_platform_interface
+        run: dart pub publish --force
 
-      - name: Deploy sdk_android
+      - name: Validate iOS implementation
+        if: inputs.ios
+        working-directory: ortto_flutter_sdk_ios
         run: |
-          cd ortto_flutter_sdk_android 
-          dart pub publish -f || true
+          flutter pub get
+          dart pub publish --dry-run
 
-      - name: Deploy sdk
+      - name: Publish iOS implementation
+        if: inputs.ios && !inputs.dry-run-only
+        working-directory: ortto_flutter_sdk_ios
+        run: dart pub publish --force
+
+      - name: Validate Android implementation
+        if: inputs.android
+        working-directory: ortto_flutter_sdk_android
         run: |
-          cd ortto_flutter_sdk 
-          dart pub publish -f || true
+          flutter pub get
+          dart pub publish --dry-run
+
+      - name: Publish Android implementation
+        if: inputs.android && !inputs.dry-run-only
+        working-directory: ortto_flutter_sdk_android
+        run: dart pub publish --force
+
+      - name: Validate umbrella SDK
+        if: inputs.sdk
+        working-directory: ortto_flutter_sdk
+        run: |
+          flutter pub get
+          dart pub publish --dry-run
+
+      - name: Publish umbrella SDK
+        if: inputs.sdk && !inputs.dry-run-only
+        working-directory: ortto_flutter_sdk
+        run: dart pub publish --force

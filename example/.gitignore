@@ -51,3 +51,6 @@ app.*.map.json
 /ios/Runner/GoogleService-Info.plist
 firebase.json
 android/app/.cxx
+
+# Local Ortto demo credentials (copy ortto.env.sample.json).
+/ortto.env.json

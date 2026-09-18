@@ -1,3 +1,15 @@
+## 0.7.0
+
+* **Breaking:** Remove the unused `allowAnonUsers` initialization argument. It was never forwarded to either native SDK; callers should omit it.
+* Rename `onbackgroundMessageReceived` to `onBackgroundMessageReceived`; the old spelling remains as a deprecated forwarding alias.
+* Prevent duplicate Android notifications by suppressing SDK display for background notification payloads while retaining display for data-only payloads.
+* Align iOS and Android link UTM results and return structured errors for malformed links and tracking timeouts.
+* Add Flutter 3.44 Swift Package Manager support and Firebase 12 compatibility.
+* Use final CocoaPods-compatible Ortto iOS SDK 1.10.1, Ortto iOS SDK `>=1.10.1 <2.0.0` through Swift Package Manager, and Ortto Android SDK 1.8.9.
+* Fix Android notification permission requests so FCM registration is not silently recorded as denied.
+* Prevent duplicate Android notifications when `firebase_messaging` and the native Ortto receiver are both installed.
+* Restore Android SDK configuration early enough for killed-state FCM delivery.
+
 ## 0.6.3
 * Update ortto_flutter_sdk_android to 0.4.9
 * Fix background push notifications failing after the first message on Android

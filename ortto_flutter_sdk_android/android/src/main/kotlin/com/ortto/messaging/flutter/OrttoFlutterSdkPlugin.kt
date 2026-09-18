@@ -2,7 +2,12 @@ package com.ortto.messaging.flutter
 
 import android.app.Activity
 import android.app.Application
+import android.Manifest
 import android.content.Context
+import android.content.pm.PackageManager
+import android.net.Uri
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import java.lang.Exception
 import com.google.firebase.messaging.RemoteMessage
@@ -15,6 +20,7 @@ import com.ortto.messaging.widget.CaptureConfig
 import com.ortto.messaging.retrofit.RegistrationResponse
 import com.ortto.messaging.PushNotificationHandler
 import com.ortto.messaging.OrttoCaptureInitException
+import androidx.core.app.ActivityCompat
 
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
@@ -22,6 +28,7 @@ import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
+import io.flutter.plugin.common.PluginRegistry
 
 enum class PushPermission {
     ASK,
@@ -32,10 +39,34 @@ enum class PushPermission {
 }
 
 class OrttoFlutterSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
+    companion object {
+        private const val NOTIFICATION_PERMISSION_REQUEST_CODE = 4107
+    }
+
     private var tag = "OrttoFlutterSdkPlugin";
     private lateinit var channel: MethodChannel
     private var applicationContext: Context? = null
     private var activity: Activity? = null;
+    private var activityBinding: ActivityPluginBinding? = null
+    private var pendingPermissionResult: MethodChannel.Result? = null
+    private val permissionResultListener = PluginRegistry.RequestPermissionsResultListener {
+            requestCode, _, grantResults ->
+        if (requestCode != NOTIFICATION_PERMISSION_REQUEST_CODE) {
+            false
+        } else {
+            val result = pendingPermissionResult
+            pendingPermissionResult = null
+            val granted = grantResults.isNotEmpty() &&
+                grantResults[0] == PackageManager.PERMISSION_GRANTED
+            if (granted) {
+                Ortto.instance().dispatchPushRequest()
+                result?.success(PushPermission.GRANTED.name)
+            } else {
+                result?.success(PushPermission.PREVIOUSLY_DENIED.name)
+            }
+            true
+        }
+    }
 
     override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
         channel = MethodChannel(flutterPluginBinding.binaryMessenger, "ortto_flutter_sdk_android")
@@ -82,12 +113,22 @@ class OrttoFlutterSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     }
 
     private fun initialize(call: MethodCall): Unit? {
+        val appKey = call.argument<String>("appKey")
+        val endpoint = call.argument<String>("endpoint")
+        val shouldSkipNonExistingContacts =
+            call.argument<Boolean>("shouldSkipNonExistingContacts") ?: false
         val config = OrttoConfig(
-            call.argument("appKey"),
-            call.argument("endpoint"),
-            call.argument("shouldSkipNonExistingContacts"),
+            appKey,
+            endpoint,
+            shouldSkipNonExistingContacts,
         )
 
+        OrttoFlutterSdkStartup.save(
+            applicationContext as Context,
+            appKey,
+            endpoint,
+            shouldSkipNonExistingContacts,
+        )
         Ortto.instance().init(config, this.applicationContext as Application)
 
         return null;
@@ -111,13 +152,13 @@ class OrttoFlutterSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
 
     private fun identify(call: MethodCall, result: MethodChannel.Result): Unit? {
         val user = UserID.make();
-        user.firstName = call.argument("firstName");
-        user.lastName = call.argument("lastName");
+        user.firstName = call.argument("first_name");
+        user.lastName = call.argument("last_name");
         user.email = call.argument("email");
-        user.acceptsGdpr = call.argument<Boolean>("acceptsGdpr") ?: false;
-        user.contactId = call.argument("contactId");
+        user.acceptsGdpr = call.argument<Boolean>("accepts_gdpr") ?: false;
+        user.contactId = call.argument("contact_id");
         user.phone = call.argument("phone");
-        user.externalId = call.argument("externalId");
+        user.externalId = call.argument("external_id");
 
         Ortto.instance().identify(user, object : Ortto.OnIdentifyListener {
             override fun onComplete() {
@@ -141,9 +182,19 @@ class OrttoFlutterSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     }
 
     private fun requestPermissions(result: MethodChannel.Result) {
-        Ortto.instance().requestPermissions(activity, object : PermissionUtil.PermissionAskListener {
+        val currentActivity = activity
+        if (currentActivity == null) {
+            result.error("NO_ACTIVITY", "Notification permission requires a foreground activity", null)
+            return
+        }
+        if (pendingPermissionResult != null) {
+            result.error("PERMISSION_IN_PROGRESS", "A notification permission request is already in progress", null)
+            return
+        }
+
+        Ortto.instance().requestPermissions(currentActivity, object : PermissionUtil.PermissionAskListener {
             override fun onPermissionAsk() {
-                result.success(PushPermission.ASK.name)
+                launchNotificationPermissionRequest(currentActivity, result)
             }
 
             override fun onPermissionDisabled() {
@@ -155,7 +206,7 @@ class OrttoFlutterSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             }
 
             override fun onPermissionPreviouslyDenied() {
-                result.success(PushPermission.PREVIOUSLY_DENIED.name)
+                launchNotificationPermissionRequest(currentActivity, result)
             }
 
             override fun onPermissionPreviouslyGranted() {
@@ -164,22 +215,70 @@ class OrttoFlutterSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         })
     }
 
+    private fun launchNotificationPermissionRequest(
+        currentActivity: Activity,
+        result: MethodChannel.Result,
+    ) {
+        pendingPermissionResult = result
+        ActivityCompat.requestPermissions(
+            currentActivity,
+            arrayOf(Manifest.permission.POST_NOTIFICATIONS),
+            NOTIFICATION_PERMISSION_REQUEST_CODE,
+        )
+    }
+
     private fun trackLinkClick(call: MethodCall, result: MethodChannel.Result) {
-        val link = call.argument<String>("link");
+        val link = call.argument<String>("link")
+        if (link.isNullOrBlank()) {
+            result.error("INVALID_ARGUMENTS", "trackLinkClick requires a non-empty link", null)
+            return
+        }
+
+        val uri = try {
+            Uri.parse(link)
+        } catch (error: RuntimeException) {
+            result.error("INVALID_LINK", "The link is malformed", error.message)
+            return
+        }
+
+        if (uri.scheme.isNullOrBlank()) {
+            result.error("INVALID_LINK", "The link is malformed", link)
+            return
+        }
+
+        val directUtm = LinkUtm.fromUri(uri)
+        if (uri.getQueryParameter("tracking_url") == null) {
+            result.success(linkUtmMap(directUtm))
+            return
+        }
+
+        val handler = Handler(Looper.getMainLooper())
+        var completed = false
+        val timeout = Runnable {
+            if (!completed) {
+                completed = true
+                result.error("TRACKING_ERROR", "Link tracking did not complete", link)
+            }
+        }
+        handler.postDelayed(timeout, 30_000)
 
         Ortto.instance().trackLinkClick(link) {
-            Log.d(tag, "trackLinkClick: $it")
-
-            val map = mapOf(
-                "utm_campaign" to it.campaign,
-                "utm_medium" to it.medium,
-                "utm_source" to it.source,
-                "utm_content" to it.content
-            )
-
-            result.success(map);
+            handler.post {
+                if (!completed) {
+                    completed = true
+                    handler.removeCallbacks(timeout)
+                    result.success(linkUtmMap(it))
+                }
+            }
         }
     }
+
+    private fun linkUtmMap(utm: LinkUtm): Map<String, String?> = mapOf(
+        "utm_campaign" to utm.campaign,
+        "utm_medium" to utm.medium,
+        "utm_source" to utm.source,
+        "utm_content" to utm.content
+    )
 
     private fun registerDeviceToken(call: MethodCall, result: MethodChannel.Result) {
         Ortto.instance().registerDeviceToken(call.argument<String>("token")) {
@@ -225,22 +324,40 @@ class OrttoFlutterSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     }
 
     override fun onAttachedToActivity(binding: ActivityPluginBinding) {
+        activityBinding = binding
         activity = binding.activity
+        binding.addRequestPermissionsResultListener(permissionResultListener)
     }
 
     override fun onDetachedFromActivityForConfigChanges() {
+        detachFromActivity()
     }
 
     override fun onReattachedToActivityForConfigChanges(binding: ActivityPluginBinding) {
+        activityBinding = binding
         activity = binding.activity
+        binding.addRequestPermissionsResultListener(permissionResultListener)
     }
 
     override fun onDetachedFromActivity() {
+        detachFromActivity()
+    }
+
+    private fun detachFromActivity() {
+        activityBinding?.removeRequestPermissionsResultListener(permissionResultListener)
+        activityBinding = null
         activity = null
+        pendingPermissionResult?.error(
+            "NO_ACTIVITY",
+            "The activity detached before notification permission completed",
+            null,
+        )
+        pendingPermissionResult = null
     }
 
     private fun onMessageReceived(call: MethodCall): Boolean {
         val message = call.argument<Map<String, Any>?>("message")
+        val handleNotificationTrigger = call.argument<Boolean>("handleNotificationTrigger") ?: true
         val context = applicationContext as Context
 
         // Inline transformation logic
@@ -273,7 +390,7 @@ class OrttoFlutterSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
 
         val handler = PushNotificationHandler(remoteMessage)
 
-        return handler.handleMessage(context)
+        return handler.handleMessage(context, handleNotificationTrigger)
     }
 
     private fun clearIdentity(result: MethodChannel.Result) {

@@ -1,209 +1,142 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-
 import 'package:ortto_flutter_sdk/ortto_flutter_sdk.dart';
-import 'package:uuid/uuid.dart';
-import 'firebase_options.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-class AppConfig {
-  static const String orttoAppKey = "<APP_KEY>";
-  static const String orttoAppEndpoint = "<APP_ENDPOINT>";
-  static const String orttoDatasourceKey = "<DATA_SOURCE_KEY>";
-  static const String orttoCaptureJsUrl = "<CAPTURE_JS_URL>";
-  static const String orttoApiHost = "<API_HOST>";
-  static const String widgetId = "<WIDGET_ID>";
+import 'app_config.dart';
+import 'design.dart';
+import 'firebase_options.dart';
+import 'push_model.dart';
+import 'views/root_view.dart';
+
+const _useNativeAndroidFirebaseConfig = bool.fromEnvironment(
+  'USE_NATIVE_ANDROID_FIREBASE_CONFIG',
+);
+const _useNativeIosFirebaseConfig = bool.fromEnvironment(
+  'USE_NATIVE_IOS_FIREBASE_CONFIG',
+);
+
+Future<void> _initializeFirebase() async {
+  final useNativeConfig = !kIsWeb &&
+      ((defaultTargetPlatform == TargetPlatform.android &&
+              _useNativeAndroidFirebaseConfig) ||
+          (defaultTargetPlatform == TargetPlatform.iOS &&
+              _useNativeIosFirebaseConfig));
+  try {
+    await Firebase.initializeApp(
+      options: useNativeConfig ? null : DefaultFirebaseOptions.currentPlatform,
+    );
+  } on FirebaseException catch (error) {
+    if (error.code != 'duplicate-app') rethrow;
+  }
+}
+
+// This is the background message handler.
+@pragma('vm:entry-point')
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  // The Android SDK registers its own FirebaseMessagingService and owns
+  // delivery in foreground, background, and process-dead states. Forwarding
+  // the same message from firebase_messaging would display it twice.
+  if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) return;
+
+  await _initializeFirebase();
+
+  // Pass the received background message to the Ortto SDK.
+  await Ortto.instance.onBackgroundMessageReceived(message.toMap());
 }
 
 void main() async {
-  // Ensure that plugin services are initialized
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Initialize Firebase
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
-
-  // Set up Firebase Messaging
-  FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(badge: true, alert: true, sound: true);
-
-  // Initialize Ortto SDK
-  await Ortto.instance.init(
-    appKey: AppConfig.orttoAppKey,
-    endpoint: AppConfig.orttoAppEndpoint,
-  );
-
-  final token = (await FirebaseMessaging.instance.getToken())!;
-
-  // Initialize Ortto Capture (not required)
-  await Ortto.instance.initCapture(
-    dataSourceKey: AppConfig.orttoDatasourceKey,
-    captureJsUrl: AppConfig.orttoCaptureJsUrl,
-    apiHost: AppConfig.orttoAppEndpoint,
-  );
-
-  await Ortto.instance.requestPermissions();
-
-  // Set up Ortto User to identify
-  const uuid = Uuid();
-  final user = UserID(externalId: uuid.v4(), email: 'joe@ortto.com');
-
-  // Identify the user
-  await Ortto.instance.identify(user);
-
-  // Uncomment if you need to automatically register device token
-  // await Ortto.instance.dispatchPushRequest();
-
-  // Set up Firebase Messaging
-  FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
-      badge: true,
-      alert: true,
-      sound: true
-  );
-
-  // Use registerDeviceToken to register the device token manually
-  final fcmToken = await FirebaseMessaging.instance.getToken();
-  if (fcmToken != null) {
-    Ortto.instance.registerDeviceToken(fcmToken);
-  }
-
-  // Handle foreground messages
-  FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-    Ortto.instance
-      .onbackgroundMessageReceived(message.toMap())
-      .then((handled) {
-        print("handled $handled");
-        return handled;
-      });
-  });
-
-  // Register background message handler
+  // On Android the google-services plugin auto-initializes the default app
+  // from google-services.json before Dart runs, which surfaces here as a
+  // duplicate-app error (Firebase.apps stays empty until the first call).
+  await _initializeFirebase();
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
-  runApp(const MyApp());
+  final prefs = await SharedPreferences.getInstance();
+  final model = PushModel(prefs);
+
+  // Firebase does not present notification payloads while an iOS app is in
+  // the foreground unless the application opts in. Keep Android delivery
+  // owned by the native Ortto FirebaseMessagingService to avoid duplicates.
+  if (!kIsWeb && defaultTargetPlatform == TargetPlatform.iOS) {
+    await FirebaseMessaging.instance
+        .setForegroundNotificationPresentationOptions(
+      alert: true,
+      badge: true,
+      sound: true,
+    );
+    FirebaseMessaging.onMessage.listen(model.handleForegroundMessage);
+  }
+
+  // Ortto SDK: initialize push and (when configured) in-app notifications.
+  if (AppConfig.canInitializeSDK) {
+    try {
+      await Ortto.instance.init(
+        appKey: AppConfig.orttoAppKey,
+        endpoint: AppConfig.orttoAppEndpoint,
+      );
+      model.appendSdkLog('Ortto.instance.init completed');
+    } catch (error) {
+      model.appendSdkLog('Ortto.instance.init failed: $error');
+    }
+  } else {
+    model.appendLog(
+        'Ortto init skipped: ${AppConfig.orttoConfigurationFailureDetail}');
+  }
+
+  if (AppConfig.canInitializeCapture) {
+    try {
+      await Ortto.instance.initCapture(
+        dataSourceKey: AppConfig.orttoDatasourceKey,
+        captureJsUrl: AppConfig.orttoCaptureJsUrl,
+        apiHost: AppConfig.orttoApiHost,
+      );
+      model.appendSdkLog('Ortto.instance.initCapture completed');
+    } catch (error) {
+      model.appendSdkLog('Ortto.instance.initCapture failed: $error');
+    }
+  } else {
+    model.appendLog('Ortto capture init skipped: capture keys not configured');
+  }
+
+  // Ortto SDK: notification tap routing. A tap while the app is in the
+  // background arrives via onMessageOpenedApp; a tap that cold-started the
+  // app arrives via getInitialMessage.
+  FirebaseMessaging.onMessageOpenedApp.listen((message) {
+    model.handleNotificationTap(message.data);
+  });
+  final initialMessage = await FirebaseMessaging.instance.getInitialMessage();
+  if (initialMessage != null) {
+    model.handleNotificationTap(initialMessage.data);
+  }
+
+  runApp(PushDemoApp(model: model));
 }
 
-// This is the background message handler
-@pragma('vm:entry-point')
-Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+class PushDemoApp extends StatelessWidget {
+  const PushDemoApp({super.key, required this.model});
 
-  // Pass the received background message to Ortto SDK
-  Ortto.instance
-    .onbackgroundMessageReceived(message.toMap())
-    .then((handled) {
-      return handled;
-    });
-}
+  final PushModel model;
 
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Live Demo',
+      title: 'Push Demo',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
-      ),
-      home: const HomePage(title: 'Flutter Demo Home Page'),
-    );
-  }
-}
-
-class HomePage extends StatefulWidget {
-  const HomePage({super.key, required this.title});
-  final String title;
-
-  @override
-  State<HomePage> createState() => _HomePageState();
-}
-
-class _HomePageState extends State<HomePage> {
-
-  final String widgetId = AppConfig.widgetId;
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(widget.title),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            ElevatedButton(
-              onPressed: () async {
-                Ortto.instance.clearIdentity()
-                  .then((value) {
-                    print("Cleared identity");
-                  })
-                  .catchError((error) {
-                    print(error);
-                  });
-              },
-              child: const Text('Clear Identity'),
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    backgroundColor: Theme.of(context).primaryColor,
-                    content: Text('Should show widget!'),
-                  ),
-                );
-
-                Ortto.instance.showWidget(widgetId)
-                  .then((value) {
-                    print("Widget shown successfully");
-                  }).catchError((error) {
-                    print("Error showing widget: $error");
-                  });
-              },
-              child: const Text('Show Widget'),
-            ),
-
-            ElevatedButton(onPressed: () async {
-              FirebaseMessaging messaging = FirebaseMessaging.instance;
-
-              NotificationSettings settings = await messaging.requestPermission(
-                alert: true,
-                badge: true,
-                provisional: false,
-                sound: true,
-              );
-
-              if (settings.authorizationStatus == AuthorizationStatus.authorized) {
-                print('User granted permission');
-              } else if (settings.authorizationStatus == AuthorizationStatus.provisional) {
-                print('User granted provisional permission');
-              } else {
-                print('User declined or has not accepted permission');
-              }
-
-              final apnsToken = await FirebaseMessaging.instance.getAPNSToken();
-              print(apnsToken);
-
-              Ortto.instance.dispatchPushRequest();
-            }, child: const Text('Request Permissions')),
-
-            ElevatedButton(onPressed: () async {
-              final fcmToken = await FirebaseMessaging.instance.getToken();
-              print(fcmToken);
-
-              Ortto.instance.trackLinkClick("some-link");
-
-            }, child: const Text('Test LInk Tracking'))
-          ],
+        fontFamily: AppFonts.sans,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: AppColors.lilac,
+          primary: AppColors.lilac,
         ),
+        scaffoldBackgroundColor: AppColors.groupedBackground,
       ),
+      home: RootView(model: model),
     );
   }
 }

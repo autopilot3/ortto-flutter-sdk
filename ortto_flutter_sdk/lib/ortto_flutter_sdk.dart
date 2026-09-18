@@ -24,13 +24,11 @@ class Ortto {
     required String appKey, 
     required String endpoint,
     bool shouldSkipNonExistingContacts = false,
-    bool allowAnonUsers = false,
   }) {
     final config = OrttoConfig(
       appKey, 
       endpoint, 
       shouldSkipNonExistingContacts: shouldSkipNonExistingContacts, 
-      allowAnonUsers: allowAnonUsers,
     );
 
     return _platform.initialize(config);
@@ -86,8 +84,25 @@ class Ortto {
     return _platform.trackLinkClick(link);
   }
 
-  Future<bool> onbackgroundMessageReceived(Map<String, dynamic> message, {bool handleNotificationTrigger = true}) {
-    return _platform.onMessageReceived(message, handleNotificationTrigger: handleNotificationTrigger);
+  Future<bool> onBackgroundMessageReceived(
+    Map<String, dynamic> message, {
+    bool? handleNotificationTrigger,
+  }) {
+    return _platform.onMessageReceived(
+      message,
+      handleNotificationTrigger: handleNotificationTrigger ?? message['notification'] == null,
+    );
+  }
+
+  @Deprecated('Use onBackgroundMessageReceived instead.')
+  Future<bool> onbackgroundMessageReceived(
+    Map<String, dynamic> message, {
+    bool? handleNotificationTrigger,
+  }) {
+    return onBackgroundMessageReceived(
+      message,
+      handleNotificationTrigger: handleNotificationTrigger,
+    );
   }
 
   Future<IdentityResult> clearIdentity() {

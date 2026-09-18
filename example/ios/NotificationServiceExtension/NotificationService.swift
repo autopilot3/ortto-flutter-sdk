@@ -6,28 +6,27 @@
 //
 
 import UserNotifications
-import OrttoPushMessagingFCM
+import OrttoFlutterNotificationServiceExtension
 
 class NotificationService: UNNotificationServiceExtension {
 
-    var contentHandler: ((UNNotificationContent) -> Void)?
-    var bestAttemptContent: UNMutableNotificationContent?
+    private var handledByOrtto = false
 
     override func didReceive(_ request: UNNotificationRequest, withContentHandler contentHandler: @escaping (UNNotificationContent) -> Void) {
 
-        self.contentHandler = contentHandler
+        handledByOrtto = OrttoNotificationService.didReceive(
+            request,
+            withContentHandler: contentHandler
+        )
 
-        let handled = PushMessaging.shared.didReceive(request, withContentHandler: contentHandler)
-
-        if !handled {
-            print("Handled!")
+        if !handledByOrtto {
+            contentHandler(request.content)
         }
     }
 
     override func serviceExtensionTimeWillExpire() {
-        if let contentHandler = contentHandler,
-            let bestAttemptContent =  bestAttemptContent {
-            contentHandler(bestAttemptContent)
+        if handledByOrtto {
+            OrttoNotificationService.serviceExtensionTimeWillExpire()
         }
     }
 }

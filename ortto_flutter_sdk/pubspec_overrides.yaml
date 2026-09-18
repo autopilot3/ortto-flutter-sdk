@@ -1,0 +1,10 @@
+# Local development overrides — pub uses the sibling packages in this repo
+# instead of the published pub.dev versions. This file is ignored by
+# `dart pub publish`, so it never ships and never needs editing for a release.
+dependency_overrides:
+  ortto_flutter_sdk_platform_interface:
+    path: ../ortto_flutter_sdk_platform_interface
+  ortto_flutter_sdk_ios:
+    path: ../ortto_flutter_sdk_ios
+  ortto_flutter_sdk_android:
+    path: ../ortto_flutter_sdk_android
