@@ -3,7 +3,7 @@ Pod::Spec.new do |s|
   s.version           = '0.7.0'
   s.summary           = 'OrttoSDK'
   s.homepage          = 'https://github.com/autopilot3/ortto-push-ios-sdk'
-  s.license           = { :type => 'MIT', :file => 'LICENSE' }
+  s.license           = { :type => 'MIT', :file => '../LICENSE' }
   s.author            = { 'Ortto.com Team' => 'help@ortto.com' }
   s.source            = { :git => 'https://github.com/autopilot3/ortto-push-ios-sdk.git', :tag => s.version.to_s }
   s.source_files      = 'ortto_flutter_sdk_ios/Sources/ortto_flutter_sdk_ios/**/*'

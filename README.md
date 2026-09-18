@@ -111,7 +111,7 @@ flutter clean
 flutter pub get
 ```
 
-The plugin resolves Ortto iOS SDK `1.10.1` or newer up to, but excluding, `2.0.0`. Projects that keep CocoaPods enabled use the final podspec fallback pinned to Ortto iOS SDK `1.10.1`; later native iOS releases are Swift Package Manager only.
+The plugin resolves Ortto iOS SDK `1.10.1` or newer up to, but excluding, `2.0.0`. Projects that keep CocoaPods enabled use the final podspec fallback pinned to Ortto iOS SDK `1.10.1`; later native iOS releases are Swift Package Manager only. Maintainers can test an unpublished native checkout by setting `ORTTO_IOS_SDK_PATH` to its absolute path before running a Flutter build.
 
 ## iOS Background Notifications
 
@@ -128,16 +128,44 @@ The plugin resolves Ortto iOS SDK `1.10.1` or newer up to, but excluding, `2.0.0
    3. Click Next
    4. Name the extension `NotificationServiceExtension`
    5. Click Finish
-4. In the `ios/Podfile` add the following
+4. With Swift Package Manager enabled, select the `NotificationServiceExtension` target in Xcode, open **General > Frameworks, Libraries, and Embedded Content**, and add the `ortto-flutter-notification-service-extension` product from the generated `ortto_flutter_sdk_ios` package.
+5. Open the `NotificationService.swift` file in the Notification Service Extension folder and replace its contents with:
+
+```swift
+import UserNotifications
+import OrttoFlutterNotificationServiceExtension
+
+class NotificationService: UNNotificationServiceExtension {
+    private var handledByOrtto = false
+
+    override func didReceive(_ request: UNNotificationRequest, withContentHandler contentHandler: @escaping (UNNotificationContent) -> Void) {
+        handledByOrtto = OrttoNotificationService.didReceive(request, withContentHandler: contentHandler)
+
+        if !handledByOrtto {
+            contentHandler(request.content)
+        }
+    }
+
+    override func serviceExtensionTimeWillExpire() {
+        if handledByOrtto {
+            OrttoNotificationService.serviceExtensionTimeWillExpire()
+        }
+    }
+}
+```
+
+### CocoaPods fallback
+
+For projects that have not enabled Swift Package Manager, add the final CocoaPods release to the extension target in `ios/Podfile`:
+
 ```ruby
 target 'NotificationServiceExtension' do
   use_frameworks!
   pod 'OrttoPushMessagingFCM', '1.10.1'
 end 
 ```
-5. Run `pod install --repo-update --project-directory=ios` in root project folder
-6. Open the `NotificationService.swift` file in the NotificationExtension folder
-7. Add an/or replace contents as follows:
+
+Then run `pod install --repo-update --project-directory=ios` and use this implementation:
 
 ```swift 
 import UserNotifications

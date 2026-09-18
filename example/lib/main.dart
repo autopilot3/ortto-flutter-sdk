@@ -14,11 +14,16 @@ import 'views/root_view.dart';
 const _useNativeAndroidFirebaseConfig = bool.fromEnvironment(
   'USE_NATIVE_ANDROID_FIREBASE_CONFIG',
 );
+const _useNativeIosFirebaseConfig = bool.fromEnvironment(
+  'USE_NATIVE_IOS_FIREBASE_CONFIG',
+);
 
 Future<void> _initializeFirebase() async {
   final useNativeConfig = !kIsWeb &&
-      defaultTargetPlatform == TargetPlatform.android &&
-      _useNativeAndroidFirebaseConfig;
+      ((defaultTargetPlatform == TargetPlatform.android &&
+              _useNativeAndroidFirebaseConfig) ||
+          (defaultTargetPlatform == TargetPlatform.iOS &&
+              _useNativeIosFirebaseConfig));
   try {
     await Firebase.initializeApp(
       options: useNativeConfig ? null : DefaultFirebaseOptions.currentPlatform,

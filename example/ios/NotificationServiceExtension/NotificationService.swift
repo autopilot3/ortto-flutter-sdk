@@ -6,7 +6,7 @@
 //
 
 import UserNotifications
-import OrttoPushMessagingFCM
+import OrttoFlutterNotificationServiceExtension
 
 class NotificationService: UNNotificationServiceExtension {
 
@@ -14,7 +14,10 @@ class NotificationService: UNNotificationServiceExtension {
 
     override func didReceive(_ request: UNNotificationRequest, withContentHandler contentHandler: @escaping (UNNotificationContent) -> Void) {
 
-        handledByOrtto = PushMessaging.shared.didReceive(request, withContentHandler: contentHandler)
+        handledByOrtto = OrttoNotificationService.didReceive(
+            request,
+            withContentHandler: contentHandler
+        )
 
         if !handledByOrtto {
             contentHandler(request.content)
@@ -23,7 +26,7 @@ class NotificationService: UNNotificationServiceExtension {
 
     override func serviceExtensionTimeWillExpire() {
         if handledByOrtto {
-            PushMessaging.shared.serviceExtensionTimeWillExpire()
+            OrttoNotificationService.serviceExtensionTimeWillExpire()
         }
     }
 }

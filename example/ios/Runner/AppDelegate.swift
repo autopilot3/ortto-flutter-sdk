@@ -5,7 +5,7 @@ import FirebaseCore
 import OrttoPushMessagingFCM
 import UserNotifications
 
-@UIApplicationMain
+@main
 @objc class AppDelegate: FlutterAppDelegate {
     override func application(
         _ application: UIApplication,
