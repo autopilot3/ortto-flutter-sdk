@@ -1,2 +1,24 @@
-<manifest package="com.ortto.messaging.flutter">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.ortto.messaging.flutter">
+    <application>
+        <provider
+            android:name="com.ortto.messaging.flutter.OrttoFlutterSdkInitProvider"
+            android:authorities="${applicationId}.ortto-flutter-sdk-init"
+            android:exported="false"
+            android:initOrder="101" />
+
+        <!-- Android delivery is owned by the native Ortto receiver. Give it
+             precedence over firebase_messaging's forwarding service so one
+             FCM message is handled and displayed exactly once. -->
+        <service
+            android:name="com.ortto.messaging.FirebaseMessageReceiver"
+            android:exported="false">
+            <intent-filter
+                android:priority="1"
+                tools:node="replace">
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+    </application>
 </manifest>

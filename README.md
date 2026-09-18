@@ -33,9 +33,10 @@ Additional `flutter test` arguments are forwarded to every package, for example:
 
 1. In the root of your project, run: `flutter pub add ortto_flutter_sdk`
 2. In your projects main file, import firebase_messaging `import 'package:firebase_messaging/firebase_messaging.dart';`
-3. Import firebase_options file `import 'firebase_options.dart';`
-4. Import ortto_flutter_sdk `import 'package:ortto_flutter_sdk/ortto_flutter_sdk.dart';`
-5. Set up Firebase Messaging and Ortto 
+3. Import Flutter's platform helpers `import 'package:flutter/foundation.dart';`
+4. Import firebase_options file `import 'firebase_options.dart';`
+5. Import ortto_flutter_sdk `import 'package:ortto_flutter_sdk/ortto_flutter_sdk.dart';`
+6. Set up Firebase Messaging and Ortto
 
 ```dart
 void main() async {
@@ -68,16 +69,14 @@ void main() async {
 
   FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(badge: true, alert: true, sound: true);
 
-  FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-    if (message.notification != null) {
-      Ortto.instance
-          .onbackgroundMessageReceived(message.toMap())
-          .then((handled) {
-        print("handled $handled");
-        return handled;
-      });
-    }
-  });
+  // Android delivery is owned by the native Ortto FirebaseMessagingService.
+  // Forward Firebase callbacks only on iOS to avoid duplicate Android
+  // notifications.
+  if (defaultTargetPlatform == TargetPlatform.iOS) {
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      Ortto.instance.onBackgroundMessageReceived(message.toMap());
+    });
+  }
 
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
@@ -86,6 +85,8 @@ void main() async {
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  if (defaultTargetPlatform == TargetPlatform.android) return;
+
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );

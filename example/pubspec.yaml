@@ -7,12 +7,15 @@ environment:
   sdk: ">=3.0.0 <4.0.0"
 
 dependencies:
+  firebase_core: ^4.0.0
   firebase_messaging: ^16.0.0
   flutter:
     sdk: flutter
+  http: ^1.2.0
   ortto_flutter_sdk: ^0.7.0
 #  ortto_flutter_sdk:
 #    path: ../ortto_flutter_sdk
+  shared_preferences: ^2.3.0
   uuid: ^3.0.6
 
 dev_dependencies:
@@ -26,3 +29,6 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+
+  shaders:
+    - shaders/mesh_gradient.frag

@@ -2,7 +2,9 @@ package com.ortto.messaging.flutter
 
 import android.app.Activity
 import android.app.Application
+import android.Manifest
 import android.content.Context
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Handler
 import android.os.Looper
@@ -18,6 +20,7 @@ import com.ortto.messaging.widget.CaptureConfig
 import com.ortto.messaging.retrofit.RegistrationResponse
 import com.ortto.messaging.PushNotificationHandler
 import com.ortto.messaging.OrttoCaptureInitException
+import androidx.core.app.ActivityCompat
 
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
@@ -25,6 +28,7 @@ import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
+import io.flutter.plugin.common.PluginRegistry
 
 enum class PushPermission {
     ASK,
@@ -35,10 +39,34 @@ enum class PushPermission {
 }
 
 class OrttoFlutterSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
+    companion object {
+        private const val NOTIFICATION_PERMISSION_REQUEST_CODE = 4107
+    }
+
     private var tag = "OrttoFlutterSdkPlugin";
     private lateinit var channel: MethodChannel
     private var applicationContext: Context? = null
     private var activity: Activity? = null;
+    private var activityBinding: ActivityPluginBinding? = null
+    private var pendingPermissionResult: MethodChannel.Result? = null
+    private val permissionResultListener = PluginRegistry.RequestPermissionsResultListener {
+            requestCode, _, grantResults ->
+        if (requestCode != NOTIFICATION_PERMISSION_REQUEST_CODE) {
+            false
+        } else {
+            val result = pendingPermissionResult
+            pendingPermissionResult = null
+            val granted = grantResults.isNotEmpty() &&
+                grantResults[0] == PackageManager.PERMISSION_GRANTED
+            if (granted) {
+                Ortto.instance().dispatchPushRequest()
+                result?.success(PushPermission.GRANTED.name)
+            } else {
+                result?.success(PushPermission.PREVIOUSLY_DENIED.name)
+            }
+            true
+        }
+    }
 
     override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
         channel = MethodChannel(flutterPluginBinding.binaryMessenger, "ortto_flutter_sdk_android")
@@ -85,12 +113,22 @@ class OrttoFlutterSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     }
 
     private fun initialize(call: MethodCall): Unit? {
+        val appKey = call.argument<String>("appKey")
+        val endpoint = call.argument<String>("endpoint")
+        val shouldSkipNonExistingContacts =
+            call.argument<Boolean>("shouldSkipNonExistingContacts") ?: false
         val config = OrttoConfig(
-            call.argument("appKey"),
-            call.argument("endpoint"),
-            call.argument("shouldSkipNonExistingContacts"),
+            appKey,
+            endpoint,
+            shouldSkipNonExistingContacts,
         )
 
+        OrttoFlutterSdkStartup.save(
+            applicationContext as Context,
+            appKey,
+            endpoint,
+            shouldSkipNonExistingContacts,
+        )
         Ortto.instance().init(config, this.applicationContext as Application)
 
         return null;
@@ -144,9 +182,19 @@ class OrttoFlutterSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     }
 
     private fun requestPermissions(result: MethodChannel.Result) {
-        Ortto.instance().requestPermissions(activity, object : PermissionUtil.PermissionAskListener {
+        val currentActivity = activity
+        if (currentActivity == null) {
+            result.error("NO_ACTIVITY", "Notification permission requires a foreground activity", null)
+            return
+        }
+        if (pendingPermissionResult != null) {
+            result.error("PERMISSION_IN_PROGRESS", "A notification permission request is already in progress", null)
+            return
+        }
+
+        Ortto.instance().requestPermissions(currentActivity, object : PermissionUtil.PermissionAskListener {
             override fun onPermissionAsk() {
-                result.success(PushPermission.ASK.name)
+                launchNotificationPermissionRequest(currentActivity, result)
             }
 
             override fun onPermissionDisabled() {
@@ -158,13 +206,25 @@ class OrttoFlutterSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             }
 
             override fun onPermissionPreviouslyDenied() {
-                result.success(PushPermission.PREVIOUSLY_DENIED.name)
+                launchNotificationPermissionRequest(currentActivity, result)
             }
 
             override fun onPermissionPreviouslyGranted() {
                 result.success(PushPermission.PREVIOUSLY_GRANTED.name)
             }
         })
+    }
+
+    private fun launchNotificationPermissionRequest(
+        currentActivity: Activity,
+        result: MethodChannel.Result,
+    ) {
+        pendingPermissionResult = result
+        ActivityCompat.requestPermissions(
+            currentActivity,
+            arrayOf(Manifest.permission.POST_NOTIFICATIONS),
+            NOTIFICATION_PERMISSION_REQUEST_CODE,
+        )
     }
 
     private fun trackLinkClick(call: MethodCall, result: MethodChannel.Result) {
@@ -264,18 +324,35 @@ class OrttoFlutterSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     }
 
     override fun onAttachedToActivity(binding: ActivityPluginBinding) {
+        activityBinding = binding
         activity = binding.activity
+        binding.addRequestPermissionsResultListener(permissionResultListener)
     }
 
     override fun onDetachedFromActivityForConfigChanges() {
+        detachFromActivity()
     }
 
     override fun onReattachedToActivityForConfigChanges(binding: ActivityPluginBinding) {
+        activityBinding = binding
         activity = binding.activity
+        binding.addRequestPermissionsResultListener(permissionResultListener)
     }
 
     override fun onDetachedFromActivity() {
+        detachFromActivity()
+    }
+
+    private fun detachFromActivity() {
+        activityBinding?.removeRequestPermissionsResultListener(permissionResultListener)
+        activityBinding = null
         activity = null
+        pendingPermissionResult?.error(
+            "NO_ACTIVITY",
+            "The activity detached before notification permission completed",
+            null,
+        )
+        pendingPermissionResult = null
     }
 
     private fun onMessageReceived(call: MethodCall): Boolean {

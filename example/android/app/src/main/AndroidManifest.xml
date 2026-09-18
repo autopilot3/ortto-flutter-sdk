@@ -8,14 +8,6 @@
         android:label="example"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
-         <service
-            android:name="com.ortto.messaging.FirebaseMessageReceiver"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="com.google.firebase.MESSAGING_EVENT" />
-            </intent-filter>
-        </service>
-        
         <activity
             android:name="com.example.flutter_ortto_push_sdk.example.MainActivity"
             android:exported="true"

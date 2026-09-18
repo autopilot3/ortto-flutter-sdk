@@ -2,6 +2,9 @@
 * Use Android SDK 1.8.9 and forward notification display control to the native handler.
 * Replace the retired Firebase Messaging KTX artifact with the main Firebase Messaging module on BOM 34.19.0.
 * Align the Android build with API 36, Java 17, and the native SDK's minimum API 26.
+* Make `requestPermissions()` launch Android's notification permission dialog and wait for the user's result.
+* Route Android FCM delivery through the native Ortto receiver once, avoiding duplicate notifications from Flutter background callbacks.
+* Restore the native Ortto configuration when FCM wakes a process-dead Flutter app.
 
 ## 0.4.9
 * Fix onMessageReceived not returning result to Dart, causing background push handlers to hang and block subsequent messages
