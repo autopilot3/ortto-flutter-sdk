@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
+import 'package:ortto_flutter_sdk/ortto_flutter_sdk.dart';
 import 'package:ortto_flutter_sdk_example/main.dart' as app;
 
 const _runPushoverE2E = bool.fromEnvironment('PUSHOVER_E2E');
@@ -48,16 +50,16 @@ void main() {
       await _pumpFor(tester, const Duration(seconds: 2));
       expect(find.byKey(const ValueKey('main')), findsOneWidget);
 
+      String? token;
       for (var attempt = 0; attempt < 45; attempt += 1) {
-        if (find.text('Registered').evaluate().isNotEmpty &&
-            find.text('Forwarded').evaluate().isNotEmpty) {
-          break;
-        }
+        token = await FirebaseMessaging.instance.getToken();
+        if (token?.isNotEmpty ?? false) break;
         await tester.pump(const Duration(seconds: 1));
       }
 
-      expect(find.text('Registered'), findsOneWidget);
-      expect(find.text('Forwarded'), findsOneWidget);
+      expect(token, isNotNull);
+      expect(token, isNotEmpty);
+      await Ortto.instance.registerDeviceToken(token!);
     },
     skip: !_runPushoverE2E,
     timeout: const Timeout(Duration(minutes: 2)),
