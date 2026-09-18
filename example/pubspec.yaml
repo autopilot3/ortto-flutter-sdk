@@ -16,7 +16,6 @@ dependencies:
 #  ortto_flutter_sdk:
 #    path: ../ortto_flutter_sdk
   shared_preferences: ^2.3.0
-  uuid: ^3.0.6
 
 dev_dependencies:
   flutter_driver:
